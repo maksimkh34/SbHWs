@@ -68,6 +68,7 @@
         public static List<Person> Data = ReadData();
         public const string FilePath = "data.txt";
         private const char Delimiter = '#';
+        private const string DelimiterStrReplace = "%del%";
 
         public static string PrintPersons()
         {
@@ -84,7 +85,7 @@
         {
             Data.Add(person);
             using var writer = new StreamWriter(FilePath, true);
-            writer.WriteLine(person);
+            writer.WriteLine(person.ToString().Replace(Delimiter.ToString(), DelimiterStrReplace));
         }
 
         public static List<Person> ReadData()
@@ -96,7 +97,7 @@
                 while (!reader.EndOfStream)
                 {
 
-                    var split = reader.ReadLine()?.Split(Delimiter) ?? Array.Empty<string>();
+                    var split = reader.ReadLine()?.Replace(DelimiterStrReplace, Delimiter.ToString()).Split(Delimiter) ?? Array.Empty<string>();
                     result.Add(new Person(
                         split[0], DateTime.Parse(split[1]), split[2], Convert.ToByte(split[3]),
                         Convert.ToByte(split[4]), DateTime.Parse(split[5]), split[6]
