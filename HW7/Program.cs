@@ -9,12 +9,14 @@
 
             while (true)
             {
-                Console.Write("Меню:\n\n\t1. Показать все записи" +
+                Console.Write("Меню:\n" +
+                              "\n\t1. Показать все записи" +
                               "\n\t2. Показать записи с выборкой по времени" +
                               "\n\t3. Показать запись по ID" +
                               "\n\t4. Добавить новую запись" +
                               "\n\t5. Удалить запись" +
-                              "\n\t6. Выход\n\nВвод: ");
+                              "\n\t6. Выход" +
+                              "\n\nВвод: ");
 
                 switch (Console.ReadLine())
                 {
@@ -22,9 +24,23 @@
                     default:
                         return;
                     case "1":
+                        Console.Write("\nСортировать по:\n\n" +
+                                          "\n\t1. ID" +
+                                          "\n\t2. Дате рождения" +
+                                          "\n\t3. Дате создания записи" +
+                                          "\n\t4. Возрасту" +
+                                          "\n\nВвод: ");
+                        var entries = Console.ReadLine() switch
+                        {
+                            "1" => db.ReadEntries().OrderBy(w => w.Id).ToArray(),
+                            "2" => db.ReadEntries().OrderBy(w => w.DateOfBirth).ToArray(),
+                            "3" => db.ReadEntries().OrderBy(w => w.CreationTime).ToArray(),
+                            "4" => db.ReadEntries().OrderBy(w => w.Age).ToArray(),
+                            _ => db.ReadEntries().OrderBy(w => w.Id).ToArray()
+                        };
                         var empty = true;
                         Console.WriteLine();
-                        foreach (var entry in db.ReadEntries())
+                        foreach (var entry in entries)
                         {
                             empty = false;
                             Console.WriteLine(entry.ToStringConsole());
@@ -51,7 +67,7 @@
                     case "3":
                         Console.Write("Введите номер ID: ");
                         Console.WriteLine();
-                        Console.WriteLine(db.GetEntry(Console.ReadLine()!)?.ToStringConsole() ?? "Ошибка получения сотрудника с таким ID.");
+                        Console.WriteLine(db.GetEntry(int.Parse(Console.ReadLine()!))?.ToStringConsole() ?? "Ошибка получения сотрудника с таким ID.");
                         break;
                     case "4":
                         Console.Write("Введите полное имя: ");
@@ -84,7 +100,7 @@
                         break;
                     case "5":
                         Console.Write("Введите номер ID: ");
-                        db.RemoveEntry(Console.ReadLine() ?? "indefinited");
+                        db.RemoveEntry(int.Parse(Console.ReadLine() ?? string.Empty));
                         Console.WriteLine("Готово.");
                         break;
 
@@ -95,7 +111,7 @@
 
     internal struct Worker
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string FullName { get; set; }
         public string PlaceOfBirth { get; set; }
         public DateTime CreationTime { get; set; }
@@ -139,7 +155,7 @@
                     DateOfBirth = DateTime.Parse(data[4]),
                     FullName = data[1],
                     Growth = Convert.ToByte(data[6]),
-                    Id = data[0],
+                    Id = Convert.ToInt32(data[0]),
                     PlaceOfBirth = data[2]
                 }).ToArray();
         }
@@ -149,7 +165,7 @@
             return ReadEntries().Where(worker => worker.CreationTime > from && worker.CreationTime < to).ToArray();
         }
 
-        public Worker? GetEntry(string id)
+        public Worker? GetEntry(int id)
         {
             var result = ReadEntries().Where(worker => worker.Id == id).ToArray();
             return result.Length == 1 ? result[0] : null;
@@ -160,13 +176,13 @@
             File.AppendAllText(_filePath, worker.ToString());
         }
 
-        public string GetId()
+        public int GetId()
         {
-            var id = new Random().Next(10000, 99999).ToString();
+            var id = new Random().Next(10000, 99999);
             return ReadEntries().Select(worker => worker.Id).Contains(id) ? GetId() : id;
         }
 
-        public void RemoveEntry(string id)
+        public void RemoveEntry(int id)
         {
             var workers = ReadEntries();
             Worker[]? result = null;
