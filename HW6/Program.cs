@@ -1,4 +1,6 @@
-﻿namespace HW6
+﻿using System.Reflection;
+
+namespace HW6
 {
     internal class Program
     {
@@ -13,28 +15,18 @@
                         Console.WriteLine(Person.PrintPersons());
                         break;
                     case "2":
-                        Console.Write("Введите полное имя: ");
-                        var fullName = Console.ReadLine() ?? "indefinited";
+                        List<string?> values = new();
+                        Person person = new();
 
-                        Console.Write("Введите номер ID: ");
-                        var id = Console.ReadLine() ?? "indefinited";
-
-                        var createTime = DateTime.Now;
-
-                        Console.Write("Введите возраст: ");
-                        var age = Convert.ToByte(Console.ReadLine());
-
-                        Console.Write("Введите рост: ");
-                        var growth = Convert.ToByte(Console.ReadLine());
-
-                        Console.Write("Введите дату рождения: ");
-                        var dateOfBirth = DateTime.Parse(Console.ReadLine() ?? "");
-
-                        Console.Write("Введите место рождения: ");
-                        var placeOfBirth = Console.ReadLine() ?? "indefinited";
+                        foreach (var prop  in person.GetProperties())
+                        {
+                            if(!prop.AskForInput) continue;
+                            Console.Write($"Введите {prop.DisplayableName}: ");
+                            values.Add(Console.ReadLine());
+                        }
 
                         Person.AppendPerson(new Person(
-                            id, createTime, fullName, age, growth, dateOfBirth, placeOfBirth
+                            values[0]!, DateTime.Now, values[1]!, Convert.ToByte(values[2]!), Convert.ToByte(values[3]!), DateTime.Parse(values[4]!), values[5]!
                             ));
 
                         Console.WriteLine("\nCompleted!");
@@ -54,31 +46,59 @@
         }
     }
 
-    internal class Person(string id, DateTime createTime, string fullName, byte age, byte growth, DateTime dateOfBirth,
+    public class Property(PropertyInfo basePropertyInfo, string displayableName)
+    {
+        public PropertyInfo BasePropertyInfo = basePropertyInfo;
+        public bool AskForInput = true;
+        public string DisplayableName = displayableName;
+
+        public object? GetValue(Person person) => BasePropertyInfo.GetValue(person);
+    }
+
+    public class Person(string id, DateTime createTime, string fullName, byte age, byte growth, DateTime dateOfBirth,
         string placeOfBirth)
     {
-        public string Id = id;
-        public DateTime CreateTime = createTime;
-        public string FullName = fullName;
-        public byte Age = age;
-        public byte Growth = growth;
-        public DateTime DateOfBirth = dateOfBirth;
-        public string PlaceOfBirth = placeOfBirth;
+        public string Id { get; set; } = id;
+        public DateTime CreateTime { get; set; } = createTime;
+        public string FullName { get; set; } = fullName;
+        public byte Age { get; set; } = age;
+        public byte Growth { get; set; } = growth;
+        public DateTime DateOfBirth { get; set; } = dateOfBirth;
+        public string PlaceOfBirth { get; set; } = placeOfBirth;
+
+        public Person() : this("", DateTime.Now, "", 1, 1, DateTime.Now, "")
+        {}
+
+        public Property[] GetProperties()
+        {
+            var props = typeof(Person).GetProperties();
+            return new Property[]
+            {
+                new(props[0], "ID"),
+                new(props[1], "Дата создания") { AskForInput = false},
+                new(props[2], "Полное имя"),
+                new(props[3], "Возраст"),
+                new(props[4], "Рост"),
+                new(props[5], "Дата рождения"),
+                new(props[6], "Место рождения"),
+            };
+        }
 
         public static List<Person> Data = ReadData();
+
         public const string FilePath = "data.txt";
         private const char Delimiter = '#';
         private const string DelimiterStrReplace = "%del%";
 
         public static string PrintPersons()
         {
-            return Data.Aggregate(string.Empty, (current, person) => current + $"Name: {person.FullName}\n" +
-                                                                     $"\tEntry created: {person.CreateTime}\n" +
-                                                                     $"\tID: {person.Id}\n" +
-                                                                     $"\tAge: {person.Age}\n" +
-                                                                     $"\tGrowth: {person.Growth}\n" +
-                                                                     $"\tDate of birth: {person.DateOfBirth:d}\n" +
-                                                                     $"\tPlace of birth: {person.PlaceOfBirth}\n\n");
+            var result = "";
+            foreach (var person in Data)
+            {
+                result += "\n";
+                result = person.GetProperties().Aggregate(result, (current, prop) => current + $"\t{prop.DisplayableName}: {prop.GetValue(person)}\n");
+            }
+            return result;
         }
 
         public static void AppendPerson(Person person)
@@ -117,13 +137,7 @@
         public override string ToString()
         {
             return 
-                $"{Id}{Delimiter}" +
-                $"{CreateTime}{Delimiter}" +
-                $"{fullName}{Delimiter}" +
-                $"{Age}{Delimiter}" +
-                $"{Growth}{Delimiter}" +
-                $"{DateOfBirth}{Delimiter}" +
-                $"{PlaceOfBirth}{Delimiter}";
+                GetProperties().Aggregate("", (current, prop) => current + (prop.GetValue(this)?.ToString() + Delimiter));
         }
     }
 }
