@@ -86,6 +86,7 @@
             Data.Add(person);
             using var writer = new StreamWriter(FilePath, true);
             writer.WriteLine(person.ToString().Replace(Delimiter.ToString(), DelimiterStrReplace));
+            writer.Close();
         }
 
         public static List<Person> ReadData()
