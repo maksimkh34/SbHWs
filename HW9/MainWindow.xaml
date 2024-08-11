@@ -1,0 +1,91 @@
+﻿<Window x:Class="HW9.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:local="clr-namespace:HW9"
+        MinWidth="250"
+        SizeToContent="WidthAndHeight"
+        Title="MainWindow" MinHeight="180">
+<Window.Resources>
+        <local:Task2Converter x:Key="Task2Converter"></local:Task2Converter>
+</Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Margin="5"
+                   Grid.Row="0"
+                   HorizontalAlignment="Center"
+                   DockPanel.Dock="Top"
+                   FontWeight="Bold">Задача 1</TextBlock>
+        <TextBlock Margin="5,0,5,5"
+                   Grid.Row="1" Grid.Column="0"
+                   DockPanel.Dock="Top">Входные данные</TextBlock>
+        <TextBox x:Name="Task1InTextBox" 
+                 VerticalAlignment="Stretch"
+                 Grid.Row="2" Grid.Column="0"
+                 Margin="5,0,5,5" 
+                 DockPanel.Dock="Top"
+                 AcceptsReturn="True"></TextBox>
+
+        <TextBlock Margin="5,0,5,5"
+                   Grid.Row="3" Grid.Column="0"
+                   DockPanel.Dock="Top">Выходные данные</TextBlock>
+        <ListBox x:Name="Task1OutListBox" 
+                 Grid.Row="4" Grid.Column="0"
+                 VerticalAlignment="Stretch"
+                 Margin="5,0,5,5" 
+                 DockPanel.Dock="Top"></ListBox>
+
+        <Button Grid.Row="5" Grid.Column="0" 
+                MinHeight="24"
+                Click="Apply_Task1Button_Click"
+                Margin="5,0,5,5">Применить</Button>
+
+        <TextBlock Margin="5"
+                   Grid.Row="0" Grid.Column="1"
+                   HorizontalAlignment="Center"
+                   DockPanel.Dock="Top"
+                   FontWeight="Bold">Задача 1</TextBlock>
+        <TextBlock Margin="5,0,5,5"
+                   Grid.Row="1" Grid.Column="1"
+                   DockPanel.Dock="Top">Входные данные</TextBlock>
+        <TextBox x:Name="Task2InTextBox" 
+                 VerticalAlignment="Stretch"
+                 Grid.Row="2" Grid.Column="1"
+                 Margin="5,0,5,5" 
+                 DockPanel.Dock="Top"
+                 AcceptsReturn="True"></TextBox>
+
+        <TextBlock Margin="5,0,5,5"
+                   Grid.Row="3" Grid.Column="1"
+                   DockPanel.Dock="Top">Выходные данные</TextBlock>
+        <Label x:Name="Task2OutLabel" 
+                 Grid.Row="4" Grid.Column="1"
+                 Content="{Binding Text, 
+            ElementName=Task2InTextBox, 
+            Converter={StaticResource Task2Converter}}"
+                 VerticalAlignment="Stretch"
+                 Margin="5,0,5,5" 
+                 DockPanel.Dock="Top"></Label>
+
+        <Button Grid.Row="5" Grid.Column="1" 
+                MinHeight="24"
+                Click="Apply_Task2Button_Click"
+                Margin="5,0,5,5">Применить</Button>
+    </Grid>
+</Window>

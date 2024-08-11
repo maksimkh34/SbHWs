@@ -18,9 +18,9 @@
             PrintWords(words);
         }
 
-        private static string[] SplitText(string text) => text.Split(' ');
+        public static IEnumerable<string> SplitText(string text) => text.Split(' ');
 
-        private static void PrintWords(string[] words)
+        public static void PrintWords(IEnumerable<string> words)
         {
             foreach (var word in words)
             {
@@ -39,7 +39,7 @@
             Console.WriteLine(Reverse(text ?? string.Empty));
         }
 
-        private static string Reverse(string text)
+        public static string Reverse(string? text)
         {
             var words = SplitText(text);
             var len = words.Length;
@@ -52,6 +52,6 @@
             return string.Join(" ", words);
         }
 
-        private static string[] SplitText(string text) => text.Split(' ');
+        public static string[] SplitText(string? text) => text.Split(' ');
     }
 }
