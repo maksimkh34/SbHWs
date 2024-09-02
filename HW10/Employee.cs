@@ -1,94 +1,92 @@
 ﻿namespace HW10
 {
-    internal abstract class Employee(long employeeId)
+    internal abstract class Employee()
     {
-        private Client? _client;
-        private long _employeeId = employeeId;
+        private protected Client? Client;
 
         public void SelectClient(long id)
         {
-            _client = Database.GetClient(id);
+            Client = Database.GetClient(id);
         }
 
         public abstract EmployeeType GetEmployeeType();
 
         public string? ClientName
         {
-            get => _client?.Name;
+            get => Client?.Name;
             set
             {
-                if (_client == null) return;
+                if (Client == null) return;
                 Database.Changes.Push(new DataChangedArgs(nameof(ClientName),
                     ClientName!, value!,
                     (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
-                _client.Name = value!;
+                Client.Name = value!;
             }
         }
 
         public string? ClientSurname
         {
-            get => _client?.Surname;
+            get => Client?.Surname;
             set
             {
-                if (_client == null) return;
+                if (Client == null) return;
                 Database.Changes.Push(new DataChangedArgs(nameof(ClientSurname),
                     ClientSurname!, value!,
                     (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
-                _client.Surname = value!;
+                Client.Surname = value!;
             }
         }
 
         public string? ClientPatronymic
         {
-            get => _client?.Patronymic;
+            get => Client?.Patronymic;
             set
             {
-                if (_client == null) return;
+                if (Client == null) return;
                 Database.Changes.Push(new DataChangedArgs(nameof(ClientPatronymic),
                     ClientPatronymic!, value!,
                     (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
-                _client.Patronymic = value!;
+                Client.Patronymic = value!;
             }
         }
 
         public string? ClientPhoneNumber
         {
-            get => _client?.PhoneNumber;
+            get => Client?.PhoneNumber;
             set
             {
-                if (_client == null) return;
+                if (Client == null) return;
                 Database.Changes.Push(new DataChangedArgs(nameof(ClientPhoneNumber),
                     ClientPhoneNumber!, value!,
                     (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
-                _client.PhoneNumber = value!;
+                Client.PhoneNumber = value!;
             }
         }
 
         public string? ClientPassport
         {
-            get => _client?.Passport;
+            get => Client?.Passport;
             set
             {
-                if (_client == null) return;
+                if (Client == null) return;
                 Database.Changes.Push(new DataChangedArgs(nameof(ClientPassport),
                     ClientPassport!, value!,
                     (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
-                _client.Passport = value!;
+                Client.Passport = value!;
             }
         }
 
         public long? ClientId
         {
-            get => _client?.Id;
+            get => Client?.Id;
             set
             {
-                if (_client == null) return;
+                if (Client == null) return;
                 Database.Changes.Push(new DataChangedArgs(nameof(ClientId),
                     ClientPhoneNumber!, value?.ToString()!,
                     (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
-                _client.Id = (long)value!;
+                Client.Id = (long)value!;
             }
         }
-
     }
 }
