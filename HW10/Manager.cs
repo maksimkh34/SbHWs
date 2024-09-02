@@ -1,0 +1,12 @@
+﻿namespace HW10
+{
+    internal class Manager(long employeeId) : Employee(employeeId), ICanAddClient
+    {
+        public override EmployeeType GetEmployeeType() => EmployeeType.Manager;
+
+        public void AddClient(string name, string surname, string patronymic, string phoneNumber, string passport)
+        {
+            Database.AddClient(new Client(name, surname, patronymic, phoneNumber, passport, Database.GetFreeId()));
+        }
+    }
+}

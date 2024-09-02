@@ -10,12 +10,18 @@
             _client = Database.GetClient(id);
         }
 
+        public abstract EmployeeType GetEmployeeType();
+
         public string? ClientName
         {
             get => _client?.Name;
             set
             {
-                if (_client != null) _client.Name = value!;
+                if (_client == null) return;
+                Database.Changes.Push(new DataChangedArgs(nameof(ClientName),
+                    ClientName!, value!,
+                    (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
+                _client.Name = value!;
             }
         }
 
@@ -24,7 +30,11 @@
             get => _client?.Surname;
             set
             {
-                if (_client != null) _client.Surname = value!;
+                if (_client == null) return;
+                Database.Changes.Push(new DataChangedArgs(nameof(ClientSurname),
+                    ClientSurname!, value!,
+                    (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
+                _client.Surname = value!;
             }
         }
 
@@ -33,7 +43,11 @@
             get => _client?.Patronymic;
             set
             {
-                if (_client != null) _client.Patronymic = value!;
+                if (_client == null) return;
+                Database.Changes.Push(new DataChangedArgs(nameof(ClientPatronymic),
+                    ClientPatronymic!, value!,
+                    (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
+                _client.Patronymic = value!;
             }
         }
 
@@ -42,7 +56,11 @@
             get => _client?.PhoneNumber;
             set
             {
-                if (_client != null) _client.PhoneNumber = value!;
+                if (_client == null) return;
+                Database.Changes.Push(new DataChangedArgs(nameof(ClientPhoneNumber),
+                    ClientPhoneNumber!, value!,
+                    (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
+                _client.PhoneNumber = value!;
             }
         }
 
@@ -51,7 +69,11 @@
             get => _client?.Passport;
             set
             {
-                if (_client != null) _client.Passport = value!;
+                if (_client == null) return;
+                Database.Changes.Push(new DataChangedArgs(nameof(ClientPassport),
+                    ClientPassport!, value!,
+                    (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
+                _client.Passport = value!;
             }
         }
 
@@ -60,7 +82,11 @@
             get => _client?.Id;
             set
             {
-                if (_client != null) _client.Id = (long)value!;
+                if (_client == null) return;
+                Database.Changes.Push(new DataChangedArgs(nameof(ClientId),
+                    ClientPhoneNumber!, value?.ToString()!,
+                    (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
+                _client.Id = (long)value!;
             }
         }
 
