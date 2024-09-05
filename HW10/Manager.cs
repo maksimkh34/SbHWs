@@ -8,5 +8,7 @@
         {
             Database.AddClient(new Client(name, surname, patronymic, phoneNumber, passport, Database.GetFreeId()));
         }
+
+        public Client? GetClient() => Client;
     }
 }

@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 
 namespace HW10
 {
     internal static class Database
     {
         public static Employee? ActiveEmployee;
-        public static List<Client> Clients = new();
+        public static List<Client> Clients = [];
         
         private const string ClientsDatabaseFilePath = "clients.json";
 
@@ -28,12 +23,12 @@ namespace HW10
                 clientsBase = LoadClients();
             }
             Clients = clientsBase.Count == 0
-                ? new List<Client>
-                {
-                    new("John", "Wu", "", "+375-29-777-55-44", "MP11112233", 2935692356),
-                    new("Sergey", "Ku", "", "+375-29-111-00-33", "MP12341212", 9385748399),
-                    new("Alex", "G", "", "+375-29-999-00-99", "MP04759376", 999912746)
-                }
+                ?
+                [
+                    new Client("John", "Wu", "", "+375-29-777-55-44", "MP11112233", 2935692356),
+                    new Client("Sergey", "Ku", "", "+375-29-111-00-33", "MP12341212", 9385748399),
+                    new Client("Alex", "G", "", "+375-29-999-00-99", "MP04759376", 999912746)
+                ]
                 : clientsBase;
         }
 
@@ -76,7 +71,7 @@ namespace HW10
 
         private static List<Client> LoadClients()
         {
-            return JsonSerializer.Deserialize<List<Client>>(File.ReadAllText(ClientsDatabaseFilePath)) ?? new List<Client>();
+            return JsonSerializer.Deserialize<List<Client>>(File.ReadAllText(ClientsDatabaseFilePath)) ?? [];
         }
     }
 }

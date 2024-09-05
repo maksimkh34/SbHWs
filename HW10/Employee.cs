@@ -9,6 +9,11 @@
             Client = Database.GetClient(id);
         }
 
+        public void SelectClient(Client client)
+        {
+            Client = client;
+        }
+
         public abstract EmployeeType GetEmployeeType();
 
         public string? ClientName

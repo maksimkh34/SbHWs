@@ -5,15 +5,14 @@
         private static void Main(string[] args)
         {
             Database.LoadDatabase();
-            var input = CM.ConsoleMenu.Ask("Выберите должность", new[] { "Консультант", "Менеджер" });
+            var input = CM.ConsoleMenu.Ask("Выберите должность", ["Консультант", "Менеджер"]);
             Database.ActiveEmployee = input switch
             {
                 1 => new Consultant(),
                 2 => new Manager(),
                 _ => Database.ActiveEmployee
             };
-            Database.ActiveEmployee?.SelectClient(GetClientIdConsole());
-            List<string> options = new() { "Сменить клиента", "Просмотр данных", "Изменение данных" };
+            List<string> options = ["Просмотреть список клиентов", "Выбрать клиента", "Просмотр данных", "Изменение данных"];
             if (Database.ActiveEmployee?.GetType() == typeof(Manager))
                 options.Add("Добавить пользователя");
 
@@ -23,10 +22,23 @@
                 switch (action)
                 {
                     case 1:
-                        Database.ActiveEmployee?.SelectClient(GetClientIdConsole());
+                        Console.WriteLine("Список клиентов: \n");
+                        foreach (var client in Database.Clients)
+                        {
+                            Console.WriteLine($"\t{client.Surname} {client.Name} (ID: {client.Id})");
+                        }
+                        Console.WriteLine();
                         break;
                     case 2:
-                        Console.WriteLine("Клиент №" + Database.ActiveEmployee?.ClientId + "\n");
+                        Database.ActiveEmployee?.SelectClient(GetClientIdConsole());
+                        break;
+                    case 3:
+                        if (Database.ActiveEmployee?.ClientId is null)
+                        {
+                            Console.WriteLine("Клиент не выбран! ");
+                            break;
+                        }
+                        Console.WriteLine("Клиент #" + Database.ActiveEmployee.ClientId + "\n");
                         foreach (var prop in (Database.ActiveEmployee?.GetType() == typeof(Manager)
                                      ? typeof(Manager)
                                      : typeof(Consultant)).GetProperties())
@@ -36,8 +48,13 @@
 
                         Console.WriteLine();
                         break;
-                    case 3:
-                        var props = (Database.ActiveEmployee?.GetType() == typeof(Manager)
+                    case 4:
+                        if (Database.ActiveEmployee?.ClientId is null)
+                        {
+                            Console.WriteLine("Клиент не выбран! ");
+                            break;
+                        }
+                        var props = (Database.ActiveEmployee.GetType() == typeof(Manager)
                             ? typeof(Manager)
                             : typeof(Consultant)).GetProperties();
                         var propsNames = props.Select(prop => prop.Name).ToList();
@@ -71,6 +88,21 @@
                             break;
                         }
                         Console.WriteLine("Данные изменены! ");
+                        break;
+                    case 5:
+                        Console.WriteLine("Введите данные о новом пользователе");
+                        var newClient = new Client();
+                        Database.ActiveEmployee?.SelectClient(newClient);
+                        foreach (var prop in (Database.ActiveEmployee?.GetType() == typeof(Manager)
+                                     ? typeof(Manager)
+                                     : typeof(Consultant)).GetProperties())
+                        {
+                            if(prop.Name == "ClientId") 
+                                continue;
+                            Console.Write($"\t{prop.Name}: ");
+                            prop.SetValue(Database.ActiveEmployee, Console.ReadLine());
+                        }
+                        Database.Clients.Add(((Manager)Database.ActiveEmployee!).GetClient()!);
                         break;
                     default:
                         Console.WriteLine("Выход... ");
