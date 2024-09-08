@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 using System.Windows.Data;
 using HW10;
 
@@ -14,6 +9,7 @@ namespace WPF
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (value is not Client client) throw new InvalidOperationException("ClientToStrConverter got object, expected client");
+            if(client.Surname == client.Name && client.Name == "") return $"ID {client.Id}";
             return $"{client.Surname} {client.Name} (ID {client.Id})";
         }
 

@@ -17,6 +17,8 @@ namespace WPF
     /// </summary>
     public partial class MainWindow : Window
     {
+        private object? _previousSelectedItem;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -27,6 +29,11 @@ namespace WPF
             DataContext = new MainViewModel();
             Database.ActiveEmployee?.SelectClient(((MainViewModel)DataContext).SelectedClient);
             ((MainViewModel)DataContext).UpdateSelectedEmployee();
+        }
+
+        private void AddClient_Click(object sender, RoutedEventArgs e)
+        {
+            ((MainViewModel)DataContext).AddNewClient();
         }
     }
 }

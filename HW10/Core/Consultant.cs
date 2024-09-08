@@ -1,14 +1,31 @@
 ﻿namespace HW10
 {
-    public class Consultant() : Employee()
+    public class Consultant : Employee
     {
-        public new string? ClientPassport => base.ClientPassport is null ? null : "*********";
+        public new string? ClientPassport
+        {
+            get => base.ClientPassport is null ? null : "*********";
+            set => _ = value;
+        }
 
-        public override EmployeeType GetEmployeeType() => EmployeeType.Consultant;
+    public override EmployeeType GetEmployeeType() => EmployeeType.Consultant;
 
-        public new string? ClientName => base.ClientName;
-        public new string? ClientSurname => base.ClientSurname;
-        public new string? ClientPatronymic => base.ClientPatronymic;
+        public new string? ClientName
+        {
+            get => base.ClientName;
+            // set { }
+            set => _ = value;
+        }
+        public new string? ClientSurname
+        {
+            get => base.ClientSurname;
+            set => _ = value;
+        }
+        public new string? ClientPatronymic
+        {
+            get => base.ClientPatronymic;
+            set => _ = value;
+        }
         // Возможно, консультанту не нужно иметь права на изменение ID клиентов. Тогда достаточно раскомментировать эту строку
         // public new long? ClientId => base.ClientId;
 
@@ -18,9 +35,6 @@
             set
             {
                 if (string.IsNullOrEmpty(value)) return;
-                Database.Changes.Push(new DataChangedArgs(nameof(ClientPhoneNumber),
-                    ClientPhoneNumber!, value!,
-                    (EmployeeType)Database.ActiveEmployee?.GetEmployeeType()!));
                 base.ClientPhoneNumber = value;
             }
         }

@@ -1,6 +1,6 @@
 ﻿namespace HW10
 {
-    public abstract class Employee()
+    public abstract class Employee
     {
         private protected Client? Client;
 
@@ -93,5 +93,7 @@
                 Client.Id = (long)value!;
             }
         }
+
+        public bool DataFilled() => ClientName != "" && ClientSurname != "" && ClientPassport != "" && ClientPhoneNumber != "";
     }
 }

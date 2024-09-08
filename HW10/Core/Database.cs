@@ -5,7 +5,7 @@ namespace HW10
     public static class Database
     {
         public static Employee? ActiveEmployee;
-        public static List<Client> Clients;
+        public static List<Client> Clients = [];
         
         private const string ClientsDatabaseFilePath = "clients.json";
 
@@ -61,7 +61,7 @@ namespace HW10
 
         public static bool ClientIdExists(long id) => Clients.Any(client => client.Id == id);
 
-        public static Stack<DataChangedArgs> Changes = new();
+        public static readonly Stack<DataChangedArgs> Changes = new();
 
         private static void SaveClients()
         {
