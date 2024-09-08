@@ -4,7 +4,6 @@
     {
         private static void Main(string[] args)
         {
-            Database.LoadDatabase();
             var input = CM.ConsoleMenu.Ask("Выберите должность", ["Консультант", "Менеджер"]);
             Database.ActiveEmployee = input switch
             {

@@ -1,6 +1,6 @@
 ﻿namespace HW10
 {
-    internal class DataChangedArgs(string changedProperty, string oldValue, string newValue, EmployeeType changedEmployeeType)
+    public class DataChangedArgs(string changedProperty, string oldValue, string newValue, EmployeeType changedEmployeeType)
     {
         public DateTime Date = DateTime.Now;
         public string ChangedProperty = changedProperty;

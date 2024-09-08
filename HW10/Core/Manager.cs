@@ -1,6 +1,6 @@
 ﻿namespace HW10
 {
-    internal class Manager() : Employee(), ICanAddClient
+    public class Manager() : Employee(), ICanAddClient
     {
         public override EmployeeType GetEmployeeType() => EmployeeType.Manager;
 

@@ -1,0 +1,43 @@
+﻿<Window x:Class="WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPF"
+        mc:Ignorable="d"
+        Loaded="MainWindow_OnLoaded"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <local:MainViewModel></local:MainViewModel>
+    </Window.DataContext>
+    <Window.Resources>
+        <local:ClientToStrConverter x:Key="ClientToStrConverter"></local:ClientToStrConverter>
+    </Window.Resources>
+    <Grid>
+<Grid.ColumnDefinitions>
+    <ColumnDefinition/>
+    <ColumnDefinition/>
+</Grid.ColumnDefinitions>
+<ListBox Grid.Column="1"
+         ItemsSource="{Binding Clients, Mode=OneWay}"
+         SelectionChanged="Selector_OnSelectionChanged"
+         SelectedIndex="{Binding SelectedClientIndex}">
+    <ListBox.ItemTemplate>
+        <DataTemplate>
+                    <ContentPresenter Content="{Binding Converter={StaticResource ClientToStrConverter}}"/>
+        </DataTemplate>
+    </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel Grid.Column="0">
+            <TextBlock Text="{Binding WindowTitle}"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"></TextBlock>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="5,0,0,0" >Имя: </TextBlock>
+                <TextBox MinWidth="120" Margin="15,0,0,0"
+                         Text="{Binding SelectedEmployee.ClientName}"></TextBox>
+                
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Window>

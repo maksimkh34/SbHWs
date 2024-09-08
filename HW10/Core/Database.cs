@@ -2,14 +2,14 @@
 
 namespace HW10
 {
-    internal static class Database
+    public static class Database
     {
         public static Employee? ActiveEmployee;
-        public static List<Client> Clients = [];
+        public static List<Client> Clients;
         
         private const string ClientsDatabaseFilePath = "clients.json";
 
-        public static void LoadDatabase()
+        static Database()
         {
             List<Client> clientsBase;
             try

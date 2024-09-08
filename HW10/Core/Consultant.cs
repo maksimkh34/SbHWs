@@ -1,6 +1,6 @@
 ﻿namespace HW10
 {
-    internal class Consultant() : Employee()
+    public class Consultant() : Employee()
     {
         public new string? ClientPassport => base.ClientPassport is null ? null : "*********";
 

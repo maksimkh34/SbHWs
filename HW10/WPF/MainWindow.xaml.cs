@@ -8,6 +8,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using HW10;
 
 namespace WPF
 {
@@ -19,6 +20,16 @@ namespace WPF
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            DataContext = new MainViewModel();
+        }
+
+        private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Database.ActiveEmployee?.SelectClient(((MainViewModel)DataContext).SelectedClient);
         }
     }
 }

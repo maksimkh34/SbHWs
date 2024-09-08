@@ -1,6 +1,6 @@
 ﻿namespace HW10
 {
-    internal class Client(string name, string surname, string patronymic, string phoneNumber, string passport, long id)
+    public class Client(string name, string surname, string patronymic, string phoneNumber, string passport, long id)
     {
         public string Name { get; set; } = name;
         public string Surname { get; set; } = surname;

@@ -1,6 +1,6 @@
 ﻿namespace HW10
 {
-    internal abstract class Employee()
+    public abstract class Employee()
     {
         private protected Client? Client;
 
