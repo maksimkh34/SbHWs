@@ -25,11 +25,8 @@ namespace WPF
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
             DataContext = new MainViewModel();
-        }
-
-        private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
             Database.ActiveEmployee?.SelectClient(((MainViewModel)DataContext).SelectedClient);
+            ((MainViewModel)DataContext).UpdateSelectedEmployee();
         }
     }
 }

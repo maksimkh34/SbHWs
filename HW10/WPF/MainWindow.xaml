@@ -20,7 +20,6 @@
 </Grid.ColumnDefinitions>
 <ListBox Grid.Column="1"
          ItemsSource="{Binding Clients, Mode=OneWay}"
-         SelectionChanged="Selector_OnSelectionChanged"
          SelectedIndex="{Binding SelectedClientIndex}">
     <ListBox.ItemTemplate>
         <DataTemplate>
@@ -28,16 +27,50 @@
         </DataTemplate>
     </ListBox.ItemTemplate>
         </ListBox>
-        <StackPanel Grid.Column="0">
+        <DockPanel Grid.Column="0">
             <TextBlock Text="{Binding WindowTitle}"
                        FontWeight="Bold"
+                       DockPanel.Dock="Top"
                        HorizontalAlignment="Center"></TextBlock>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Margin="5,0,0,0" >Имя: </TextBlock>
-                <TextBox MinWidth="120" Margin="15,0,0,0"
+            <DockPanel DockPanel.Dock="Top"
+                       Margin="0,0,0,5">
+                <TextBlock Margin="5,0,0,0" DockPanel.Dock="Left">Имя:</TextBlock>
+                <TextBox MinWidth="120" Margin="15,0,5,0"
                          Text="{Binding SelectedEmployee.ClientName}"></TextBox>
-                
-            </StackPanel>
-        </StackPanel>
+
+            </DockPanel>
+            <DockPanel Margin="0,0,0,5"
+                       DockPanel.Dock="Top">
+                <TextBlock Margin="5,0,0,0" DockPanel.Dock="Left">Фамилия:</TextBlock>
+                <TextBox MinWidth="120" Margin="15,0,5,0"
+                         Text="{Binding SelectedEmployee.ClientSurname}"></TextBox>
+
+            </DockPanel>
+            <DockPanel Margin="0,0,0,5"
+                       DockPanel.Dock="Top">
+                <TextBlock Margin="5,0,0,0" DockPanel.Dock="Left">Отчество:</TextBlock>
+                <TextBox MinWidth="120" Margin="15,0,5,0"
+                         Text="{Binding SelectedEmployee.ClientPatronymic}"></TextBox>
+
+            </DockPanel>
+            <DockPanel Margin="0,0,0,5"
+                       DockPanel.Dock="Top">
+                <TextBlock Margin="5,0,0,0" DockPanel.Dock="Left">Номер телефона:</TextBlock>
+                <TextBox MinWidth="120" Margin="15,0,5,0"
+                         Text="{Binding SelectedEmployee.ClientPhoneNumber}"></TextBox>
+
+            </DockPanel>
+            <DockPanel Margin="0,0,0,5"
+                       DockPanel.Dock="Top"
+                       VerticalAlignment="Top">
+                <TextBlock Margin="5,0,0,0" DockPanel.Dock="Left">Номер паспорта:</TextBlock>
+                <TextBox MinWidth="120" Margin="15,0,5,0"
+                         Text="{Binding SelectedEmployee.ClientPassport}"></TextBox>
+
+            </DockPanel>
+            <TextBlock DockPanel.Dock="Bottom" 
+                       VerticalAlignment="Bottom" 
+                       Text="{Binding ChangesNumberTextBlockTitle}" Margin="5,0,0,5"></TextBlock>
+        </DockPanel>
     </Grid>
 </Window>

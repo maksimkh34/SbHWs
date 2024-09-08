@@ -19,10 +19,12 @@ namespace WPF
             {
                 if (_selectedClientIndex == value) return;
                 _selectedClientIndex = value;
+                Database.ActiveEmployee?.SelectClient(SelectedClient.Id);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(SelectedClient));
                 OnPropertyChanged(nameof(SelectedEmployee));
                 OnPropertyChanged(nameof(WindowTitle));
+                OnPropertyChanged(nameof(ChangesNumberTextBlockTitle));
             }
         }
 
@@ -30,6 +32,7 @@ namespace WPF
         public Client SelectedClient => Clients[SelectedClientIndex];
 
         public Employee SelectedEmployee => Database.ActiveEmployee!;
+        public string ChangesNumberTextBlockTitle => "Всего изменений внесено: " + Database.Changes.Count;
         public string WindowTitle => "Клиент " + SelectedClient.Id;
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -38,5 +41,7 @@ namespace WPF
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        public void UpdateSelectedEmployee() => OnPropertyChanged(nameof(SelectedEmployee));
     }
 }
