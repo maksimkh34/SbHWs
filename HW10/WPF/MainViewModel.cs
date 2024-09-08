@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using HW10;
 
 namespace WPF
@@ -25,11 +26,6 @@ namespace WPF
                 OnPropertyChanged(nameof(SelectedClient));
                 OnPropertyChanged(nameof(SelectedEmployee));
                 OnPropertyChanged(nameof(WindowTitle));
-                OnPropertyChanged(nameof(ClientName));
-                OnPropertyChanged(nameof(ClientSurname));
-                OnPropertyChanged(nameof(ClientPassport));
-                OnPropertyChanged(nameof(ClientPatronymic));
-                OnPropertyChanged(nameof(ClientPhoneNumber));
                 OnPropertyChanged(nameof(ChangesNumber));
             }
         }
@@ -44,56 +40,6 @@ namespace WPF
         public bool CanSwitchClient => Database.ActiveEmployee?.DataFilled() ?? true;
         public string WindowTitle => "Клиент " + SelectedClient.Id;
 
-        public string? ClientName
-        {
-            get => SelectedEmployee.ClientName;
-            set
-            {
-                SelectedEmployee.ClientName = value;
-                OnPropertyChanged(nameof(CanSwitchClient));
-            }
-        }
-
-        public string? ClientSurname
-        {
-            get => SelectedEmployee.ClientSurname;
-            set
-            {
-                SelectedEmployee.ClientSurname = value;
-                OnPropertyChanged(nameof(CanSwitchClient));
-            }
-        }
-
-        public string? ClientPatronymic
-        {
-            get => SelectedEmployee.ClientPatronymic;
-            set
-            {
-                SelectedEmployee.ClientPatronymic = value;
-                OnPropertyChanged(nameof(CanSwitchClient));
-            }
-        }
-
-        public string? ClientPassport
-        {
-            get => SelectedEmployee.ClientPassport;
-            set
-            {
-                SelectedEmployee.ClientPassport = value;
-                OnPropertyChanged(nameof(CanSwitchClient));
-            }
-        }
-
-        public string? ClientPhoneNumber
-        {
-            get => SelectedEmployee.ClientPhoneNumber;
-            set
-            {
-                SelectedEmployee.ClientPhoneNumber = value;
-                OnPropertyChanged(nameof(CanSwitchClient));
-            }
-        }
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -102,6 +48,9 @@ namespace WPF
         }
 
         public void UpdateSelectedEmployee() => OnPropertyChanged(nameof(SelectedEmployee));
+
+        public ICommand ChangeSelectionCommand { get; }
+
 
         public void AddNewClient()
         {

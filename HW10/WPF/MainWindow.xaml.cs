@@ -35,5 +35,25 @@ namespace WPF
         {
             ((MainViewModel)DataContext).AddNewClient();
         }
+
+        private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                var prevSelected = (Client)e.RemovedItems[0]!;
+                var nextSelected = (Client)e.AddedItems[0]!;
+                if (prevSelected.Name != "" &&
+                    prevSelected.Surname != "" &&
+                    prevSelected.Passport != "" &&
+                    prevSelected.PhoneNumber != "") return;
+                if (nextSelected.Name == "" ||
+                    nextSelected.Surname == "" ||
+                    nextSelected.Passport == "" ||
+                    nextSelected.PhoneNumber == "") return;
+                    MessageBox.Show("Заполните все поля! ", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
+                if (sender is ListBox listBox) listBox.SelectedItem = prevSelected;
+            }
+            catch(IndexOutOfRangeException) { }
+        }
     }
 }
