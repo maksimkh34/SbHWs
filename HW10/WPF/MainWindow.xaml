@@ -33,7 +33,9 @@
         </ListBox.ItemTemplate>
         <ListBox.ContextMenu>
             <ContextMenu>
-                <MenuItem Header="Удалить" Click="ClientsContextMenuDelete_Click"/>
+                <MenuItem Header="Удалить" 
+                          IsEnabled="{Binding CanAddClients}"
+                          Click="ClientsContextMenuDelete_Click"/>
             </ContextMenu>
         </ListBox.ContextMenu>
             </ListBox>
