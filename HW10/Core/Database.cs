@@ -7,6 +7,7 @@ namespace HW10
     {
         public static Employee? ActiveEmployee;
         public static List<Client> Clients = [];
+        public static readonly Stack<DataChangedArgs> Changes = new();
 
         public static bool ClientDatabasesEquals(IEnumerable<Client> list1, IEnumerable<Client> list2)
         {
@@ -75,8 +76,6 @@ namespace HW10
         } 
 
         public static bool ClientIdExists(long id) => Clients.Any(client => client.Id == id);
-
-        public static readonly Stack<DataChangedArgs> Changes = new();
 
         private static void SaveClients()
         {

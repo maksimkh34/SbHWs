@@ -63,6 +63,9 @@ namespace WPF
             viewModel.SortClientsById();
         }
 
-
+        private void TextBox_OnLostFocus(object sender, RoutedEventArgs e)
+        {
+            viewModel.UpdateClientsView();
+        }
     }
 }

@@ -58,14 +58,18 @@
             <DockPanel DockPanel.Dock="Top"
                        Margin="0,0,0,5">
                 <TextBlock Margin="5,0,0,0" DockPanel.Dock="Left">Имя:</TextBlock>
-                <TextBox MinWidth="120" Margin="15,0,5,0"
+                <TextBox MinWidth="120" 
+                         LostFocus="TextBox_OnLostFocus"
+                         Margin="15,0,5,0"
                          Text="{Binding SelectedEmployee.ClientName}"></TextBox>
 
             </DockPanel>
             <DockPanel Margin="0,0,0,5"
                        DockPanel.Dock="Top">
                 <TextBlock Margin="5,0,0,0" DockPanel.Dock="Left">Фамилия:</TextBlock>
-                <TextBox MinWidth="120" Margin="15,0,5,0"
+                <TextBox MinWidth="120" 
+                         Margin="15,0,5,0"
+                         LostFocus="TextBox_OnLostFocus"
                          Text="{Binding SelectedEmployee.ClientSurname}"></TextBox>
 
             </DockPanel>
