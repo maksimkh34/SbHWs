@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections.ObjectModel;
+using System.Text.Json;
 
 namespace HW10
 {
@@ -6,6 +7,20 @@ namespace HW10
     {
         public static Employee? ActiveEmployee;
         public static List<Client> Clients = [];
+
+        public static bool ClientDatabasesEquals(IEnumerable<Client> list1, IEnumerable<Client> list2)
+        {
+            IEnumerable<Client> clients1 = list1.ToList();
+            IEnumerable<Client> clients2 = list2.ToList();
+
+            if (clients1.Count() != clients2.Count()) return false;
+            for (var i = 0; i < clients1.Count(); i++)
+            {
+                if (!clients1.ElementAt(i).Equals(clients2.ElementAt(i)))
+                    return false;
+            }
+            return true;
+        }
         
         private const string ClientsDatabaseFilePath = "clients.json";
 
@@ -26,8 +41,8 @@ namespace HW10
                 ?
                 [
                     new Client("John", "Wu", "", "+375-29-777-55-44", "MP11112233", 2935692356),
-                    new Client("Sergey", "Ku", "", "+375-29-111-00-33", "MP12341212", 9385748399),
-                    new Client("Alex", "G", "", "+375-29-999-00-99", "MP04759376", 999912746)
+                    new Client("Sergey", "Ku", "", "+375-29-111-00-33", "MP12341212",999912746),
+                    new Client("Alex", "G", "", "+375-29-999-00-99", "MP04759376", 9385748399)
                 ]
                 : clientsBase;
         }

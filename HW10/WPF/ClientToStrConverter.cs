@@ -10,7 +10,7 @@ namespace WPF
         {
             if (value is not Client client) throw new InvalidOperationException("ClientToStrConverter got object, expected client");
             if(client.Surname == client.Name && client.Name == "") return $"ID {client.Id}";
-            return $"{client.Surname} {client.Name} (ID {client.Id})";
+            return $"{client.Surname}\t{client.Name}\t(ID {client.Id})";
         }
 
         public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

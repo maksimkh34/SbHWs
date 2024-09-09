@@ -13,5 +13,28 @@
             surname, patronymic, phoneNumber, passport, Database.GetFreeId()) { }
 
         public Client() : this("", "", "", "", "") { }
+
+        public bool DataFilled()
+        {
+            return Name != "" &&
+                   Surname != "" &&
+                   Passport != "" &&
+                   PhoneNumber != "";
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Client client && Equals(client);
+        }
+
+        protected bool Equals(Client other)
+        {
+            return Name == other.Name 
+                   && Surname == other.Surname
+                   && Patronymic == other.Patronymic 
+                   && PhoneNumber == other.PhoneNumber
+                   && Passport == other.Passport 
+                   && Id == other.Id;
+        }
     }
 }

@@ -32,12 +32,23 @@
             </DataTemplate>
         </ListBox.ItemTemplate>
     </ListBox>
+            <Button DockPanel.Dock="Bottom" 
+                    VerticalAlignment="Bottom" 
+                    Margin="5"
+                    IsEnabled="{Binding CanAddClients}"
+                    Click="AddClient_Click"
+                    MinHeight="28">Добавить</Button>
     <Button DockPanel.Dock="Bottom" 
             VerticalAlignment="Bottom" 
-            Margin="5"
-            IsEnabled="{Binding CanAddClients}"
-            Click="AddClient_Click"
-            MinHeight="28">Добавить</Button>
+            Margin="5,5,5,0"
+            Click="SortByIdButton_Click"
+            MinHeight="28">Сортировать по ID</Button>
+            <Button DockPanel.Dock="Bottom" 
+            VerticalAlignment="Bottom" 
+            Margin="5,5,5,0"
+            Click="SortByNameButton_Click"
+            MinHeight="28">Сортировать по имени</Button>
+
         </DockPanel>
         <DockPanel Grid.Column="0">
             <TextBlock Text="{Binding WindowTitle}"

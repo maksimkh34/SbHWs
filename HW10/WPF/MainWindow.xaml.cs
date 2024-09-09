@@ -17,7 +17,11 @@ namespace WPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        private object? _previousSelectedItem;
+        private MainViewModel viewModel
+        {
+            get => ((MainViewModel)DataContext);
+            set => DataContext = value;
+        }
 
         public MainWindow()
         {
@@ -26,14 +30,14 @@ namespace WPF
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            DataContext = new MainViewModel();
-            Database.ActiveEmployee?.SelectClient(((MainViewModel)DataContext).SelectedClient);
-            ((MainViewModel)DataContext).UpdateSelectedEmployee();
+            viewModel = new MainViewModel();
+            Database.ActiveEmployee?.SelectClient(viewModel.SelectedClient);
+            viewModel.UpdateSelectedEmployee();
         }
 
         private void AddClient_Click(object sender, RoutedEventArgs e)
         {
-            ((MainViewModel)DataContext).AddNewClient();
+            viewModel.AddNewClient();
         }
 
         private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -42,18 +46,23 @@ namespace WPF
             {
                 var prevSelected = (Client)e.RemovedItems[0]!;
                 var nextSelected = (Client)e.AddedItems[0]!;
-                if (prevSelected.Name != "" &&
-                    prevSelected.Surname != "" &&
-                    prevSelected.Passport != "" &&
-                    prevSelected.PhoneNumber != "") return;
-                if (nextSelected.Name == "" ||
-                    nextSelected.Surname == "" ||
-                    nextSelected.Passport == "" ||
-                    nextSelected.PhoneNumber == "") return;
+                if (MainViewModel.CanChangeSelection(prevSelected, nextSelected)) return;
                     MessageBox.Show("Заполните все поля! ", "Внимание", MessageBoxButton.OK, MessageBoxImage.Warning);
                 if (sender is ListBox listBox) listBox.SelectedItem = prevSelected;
             }
             catch(IndexOutOfRangeException) { }
         }
+
+        private void SortByNameButton_Click(object sender, RoutedEventArgs e)
+        {
+            viewModel.SortClientsByName();
+        }
+
+        private void SortByIdButton_Click(object sender, RoutedEventArgs e)
+        {
+            viewModel.SortClientsById();
+        }
+
+
     }
 }

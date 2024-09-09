@@ -30,7 +30,11 @@ namespace WPF
             }
         }
 
-        public ObservableCollection<Client> Clients => new(Database.Clients);
+        public ObservableCollection<Client> Clients
+        {
+            get => new(Database.Clients);
+            set => Database.Clients = value.ToList();
+        }
         public Client SelectedClient => Clients[SelectedClientIndex];
 
         public Employee SelectedEmployee => Database.ActiveEmployee!;
@@ -49,9 +53,6 @@ namespace WPF
 
         public void UpdateSelectedEmployee() => OnPropertyChanged(nameof(SelectedEmployee));
 
-        public ICommand ChangeSelectionCommand { get; }
-
-
         public void AddNewClient()
         {
             Database.Clients.Add(new Client());
@@ -59,5 +60,28 @@ namespace WPF
             OnPropertyChanged(nameof(Clients));
             OnPropertyChanged(nameof(SelectedEmployee));
         }
+
+        public static bool CanChangeSelection(Client prev, Client next) => prev.DataFilled() || !next.DataFilled();
+
+        public void SortClientsByName()
+        {
+            SortClientsByProp("Name");
+        }
+
+        public void SortClientsById()
+        {
+            SortClientsByProp("Id");
+        }
+
+        private void SortClientsByProp(string propertyName)
+        {
+            var sortedAsc = Clients.OrderBy(x => x.GetType().GetProperty(propertyName)?.GetValue(x, null)).ToList();
+            Clients = Database.ClientDatabasesEquals(Clients, sortedAsc)
+                ? new ObservableCollection<Client>(Clients.OrderByDescending(x => x.GetType().GetProperty(propertyName)?.GetValue(x, null)))
+                : new ObservableCollection<Client>(sortedAsc);
+            OnPropertyChanged(nameof(Clients));
+        }
+
+        public void UpdateClientsView() => OnPropertyChanged(nameof(Clients));
     }
 }
