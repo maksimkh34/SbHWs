@@ -31,7 +31,12 @@
                 <ContentPresenter Content="{Binding Converter={StaticResource ClientToStrConverter}}"/>
             </DataTemplate>
         </ListBox.ItemTemplate>
-    </ListBox>
+        <ListBox.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Удалить" Click="ClientsContextMenuDelete_Click"/>
+            </ContextMenu>
+        </ListBox.ContextMenu>
+            </ListBox>
             <Button DockPanel.Dock="Bottom" 
                     VerticalAlignment="Bottom" 
                     Margin="5"

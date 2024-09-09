@@ -35,7 +35,8 @@ namespace WPF
             get => new(Database.Clients);
             set => Database.Clients = value.ToList();
         }
-        public Client SelectedClient => Clients[SelectedClientIndex];
+
+        public Client SelectedClient => _selectedClientIndex == -1 ? Clients.First() : Clients[SelectedClientIndex];
 
         public Employee SelectedEmployee => Database.ActiveEmployee!;
         public string ChangesNumber => "Всего изменений внесено: " + Database.Changes.Count;
@@ -83,5 +84,11 @@ namespace WPF
         }
 
         public void UpdateClientsView() => OnPropertyChanged(nameof(Clients));
+
+        public void RemoveSelected()
+        {
+            Database.Clients.Remove(SelectedClient);
+            OnPropertyChanged(nameof(Clients));
+        }
     }
 }

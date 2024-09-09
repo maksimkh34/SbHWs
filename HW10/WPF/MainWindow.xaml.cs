@@ -67,5 +67,10 @@ namespace WPF
         {
             viewModel.UpdateClientsView();
         }
+
+        private void ClientsContextMenuDelete_Click(object sender, RoutedEventArgs e)
+        {
+            viewModel.RemoveSelected();
+        }
     }
 }
