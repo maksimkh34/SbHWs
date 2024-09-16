@@ -118,8 +118,8 @@
                         {
                             Console.WriteLine($"\nПользователь {usr.Name} {usr.Surname}" +
                                               $"\n\tБаланс: {usr.NonDepositAccount.GetBalance()}" +
-                                              $"\n\tДепозит открыт: {(usr.DepositAccount.IsBlocked() ? "Нет" : "Да")}" +
-                                              $"\n\tСумма депозита: {(usr.DepositAccount.IsBlocked() ? "Счет закрыт" : usr.DepositAccount.GetBalance())}\n");
+                                              $"\n\tДепозит открыт: {(usr.DepositAccount.IsBlocked() && usr.DepositAccount.GetBalance() == 0 ? "Нет" : "Да")}" +
+                                              $"\n\tСумма депозита: {usr.DepositAccount.GetBalance()}\n");
                         }
                         break;
                     case 8:
