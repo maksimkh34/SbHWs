@@ -1,46 +1,48 @@
 ﻿namespace HW12
 {
-    internal abstract class Account
+    internal abstract class Account(uint balance)
     {
-        private uint balance = 0;
-        private bool blocked = false;
+        private bool _blocked = true;
 
-        public Account(uint balance)
-        {
-             this.balance = balance; 
-        }
-
-        public Account() : this(0) { }
+        protected Account() : this(0) { }
 
         public uint GetBalance() => balance;
-        public void BlockAccount() => blocked = true;
-        public void UnblockAccount() => blocked = false;
+        public bool GetBlocked() => _blocked;
+        public void BlockAccount() => _blocked = true;
+        public void UnblockAccount() => _blocked = false;
 
-        public OperationResult Deposit(uint amount)
+        public virtual OperationResult Deposit(uint amount)
         {
-            if (blocked) return OperationResult.Rejected;
+            if (_blocked) return new OperationResult(OperationResultEnum.Rejected, 0);
             balance += amount;
-            return OperationResult.Success;
+            return new OperationResult(OperationResultEnum.Success, amount);
         }
 
         public virtual OperationResult Take(uint amount) 
         {
-            if (blocked) return OperationResult.Rejected;
-            if (balance - amount < 0) return OperationResult.NotEnoughBalance;
+            if (_blocked) return new OperationResult(OperationResultEnum.Rejected, 0);
+            if ((int)balance - amount < 0) return new OperationResult(OperationResultEnum.NotEnoughBalance, 0);
             balance -= amount;
-            return OperationResult.Success;
+            return new OperationResult(OperationResultEnum.Success, amount);
         }
 
-        public OperationResult TransferTo(Account account, uint amount) 
+        public virtual OperationResult TransferTo(Account account, uint amount) 
         { 
-            if(blocked) return OperationResult.Rejected;
-            if(Take(amount) == OperationResult.NotEnoughBalance) return OperationResult.NotEnoughBalance;
-            if(account.Deposit(amount) == OperationResult.Rejected) return OperationResult.Rejected;
-            return OperationResult.Success;
+            if(_blocked) return new OperationResult(OperationResultEnum.Rejected, 0);
+            if(Take(amount) == new OperationResult(OperationResultEnum.NotEnoughBalance, 0)) return new OperationResult(OperationResultEnum.NotEnoughBalance, 0);
+            return account.Deposit(amount) == new OperationResult(OperationResultEnum.Rejected, 0) ? 
+                new OperationResult(OperationResultEnum.Rejected, 0) : 
+                new OperationResult(OperationResultEnum.Success, amount);
         }
     }
 
-    public enum OperationResult
+    public record OperationResult(OperationResultEnum R, uint V)
+    {
+        public OperationResultEnum Result { get; set; } = R;
+        public uint OperationValue { get; set; } = V;
+    }
+
+    public enum OperationResultEnum
     {
         Success,
         NotEnoughBalance,

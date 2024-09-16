@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HW12
+﻿namespace HW12
 {
     internal class NonDepositAccount : Account
     {
