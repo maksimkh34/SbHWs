@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HW12", "HW12.csproj", "{008194BC-B019-45CE-B195-75E463C4F884}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HW12", "HW12.csproj", "{008194BC-B019-45CE-B195-75E463C4F884}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HW12UI", "..\HW12UI\HW12UI.csproj", "{ED91FA38-A844-4E7B-834A-42017142FD32}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{008194BC-B019-45CE-B195-75E463C4F884}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{008194BC-B019-45CE-B195-75E463C4F884}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{008194BC-B019-45CE-B195-75E463C4F884}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED91FA38-A844-4E7B-834A-42017142FD32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED91FA38-A844-4E7B-834A-42017142FD32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED91FA38-A844-4E7B-834A-42017142FD32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED91FA38-A844-4E7B-834A-42017142FD32}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

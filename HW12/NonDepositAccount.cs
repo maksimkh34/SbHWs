@@ -1,6 +1,6 @@
 ﻿namespace HW12
 {
-    internal class NonDepositAccount : Account
+    public class NonDepositAccount : Account
     {
     }
 }

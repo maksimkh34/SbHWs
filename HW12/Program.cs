@@ -1,8 +1,8 @@
 ﻿namespace HW12
 {
-    internal class Program
+    public static class Program
     {
-        private static readonly List<User> Users = LoadUsers();
+        public static readonly List<User> Users = LoadUsers();
         private static int CurrentUserIndex { get; set; }
 
         public static User CurrentUser
@@ -17,7 +17,7 @@
             }
         }
 
-        public static void Main()
+        public static void ConsoleMain()
         {
             if (Users.Count == 0)
             {
@@ -133,7 +133,7 @@
 
         private static List<User> LoadUsers()
         {
-            return [];
+            return [new User("123123", "312321"), new User("ame", "duo"), new User("alex", "doe")];
         }
 
         public static User? GetUser(string name, string surname)

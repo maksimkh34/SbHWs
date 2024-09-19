@@ -1,6 +1,6 @@
 ﻿namespace HW12
 {
-    internal class UserAccount<T> where T : Account, new()
+    public class UserAccount<T> where T : Account, new()
     {
         private readonly T _account;
         public bool IsBlocked() => _account.GetBlocked();

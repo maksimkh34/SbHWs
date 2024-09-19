@@ -1,6 +1,6 @@
 ﻿namespace HW12
 {
-    internal abstract class Account(uint balance)
+    public abstract class Account(uint balance)
     {
         private bool _blocked = true;
 
