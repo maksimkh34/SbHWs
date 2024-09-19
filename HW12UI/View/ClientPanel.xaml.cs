@@ -37,7 +37,7 @@ namespace HW12UI.View
 
         private void ClientPanel_OnLoaded(object sender, RoutedEventArgs e)
         {
-            ViewModel = new ClientPanelViewModel(_selectedUser);
+            ViewModel = new ClientPanelViewModel(_selectedUser, () => { SumTextBox.Text = "0"; SumTextBox.SelectAll();});
         }
     }
 }

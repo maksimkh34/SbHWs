@@ -3,7 +3,7 @@
 namespace HW12UI.Core
 {
     public class DelegateCommand(Action<object> openAction, Predicate<object>?
-        canExecutePredicate = null, Action? closeWindow = null) : ICommand
+        canExecutePredicate = null, Action? closeWindow = null, Action? commandExecuted = null) : ICommand
     {
         public static bool DefaultCanExecute(object param) => true;
 
@@ -17,6 +17,7 @@ namespace HW12UI.Core
         public void Execute(object? parameter)
         {
             openAction(parameter!);
+            commandExecuted?.Invoke();
             try { closeWindow?.Invoke(); }
             catch (System.ComponentModel.Win32Exception) { }
         }

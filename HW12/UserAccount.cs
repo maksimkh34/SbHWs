@@ -18,8 +18,8 @@
 
         public Action<string> Message;
 
-        public void BlockAccount() => _account.BlockAccount();
-        public void UnblockAccount() => _account.UnblockAccount();
+        public void BlockAccount() { _account.BlockAccount(); Message.Invoke("Операции запрещены! ");}
+        public void UnblockAccount() { _account.UnblockAccount(); Message.Invoke("Операции разрешены! "); }
 
         public void Deposit(uint amount)
         {
