@@ -23,7 +23,7 @@
                    Margin="5"
                    DockPanel.Dock="Top"
                    FontSize="16"></TextBlock>
-        <GroupBox Header="Операции с недепозитным счетом"
+        <GroupBox Header="Недепозитный счет"
                   DockPanel.Dock="Top" Margin="5,0,5,5">
             <DockPanel>
                 <TextBlock DockPanel.Dock="Top"
@@ -69,6 +69,28 @@
                 <TextBlock Margin="5,5,0,0" DockPanel.Dock="Bottom"
                            Text="{Binding NonDepositAccountBalance}"></TextBlock>
             </DockPanel>
+        </GroupBox>
+        <GroupBox Header="Депозитный счет"
+                  Margin="5,0,5,5"
+                  DockPanel.Dock="Top">
+            <StackPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           HorizontalAlignment="Center" Margin="0,5,0,0">Сумма</TextBlock>
+                <TextBox DockPanel.Dock="Top"
+                         Margin="5,5,5,0"
+                         Text="{Binding DepositOperationSumStr}"></TextBox>
+                <Button Margin="5,5,5,0" 
+                        IsEnabled="{Binding CanOpenDeposit}"
+                        Command="{Binding OpenDepositCommand}">Открыть</Button>
+                <Button Margin="5,5,5,0" 
+                        IsEnabled="{Binding CanAllowWithdrawal}"
+                        Command="{Binding AllowWithdrawalCommand}">Разрешить вывод средств</Button>
+                <Button Margin="5,5,5,5" 
+                        IsEnabled="{Binding CanWithdrawDeposit}"
+                        Command="{Binding WithdrawDepositCommand}">Снять деньги</Button>
+                <TextBlock Margin="5,5,0,0" DockPanel.Dock="Bottom"
+                           Text="{Binding DepositAccountBalance}"></TextBlock>
+            </StackPanel>
         </GroupBox>
         <Button DockPanel.Dock="Bottom"
                 Margin="5" Padding="5,1,5,1">Добавить нового клиента</Button>

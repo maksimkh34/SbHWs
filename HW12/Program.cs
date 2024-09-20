@@ -97,9 +97,9 @@
                             Console.WriteLine("Введена неверная сумма. ");
                             break;
                         }
-                        CurrentUser.DepositAccount.UnblockAccount();
+                        CurrentUser.DepositAccount.UnblockAccount(true);
                         CurrentUser.DepositAccount.Deposit(amount);
-                        CurrentUser.DepositAccount.BlockAccount();
+                        CurrentUser.DepositAccount.BlockAccount(true);
                         Console.WriteLine("Сумма внесена! До определенного срока снять ее будет невозможно. ");
                         break;
                     case 6:
