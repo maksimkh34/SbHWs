@@ -49,22 +49,25 @@
                             Padding="5,1,5,1">
                     </Button>
                     <Button Grid.Row="0" Grid.Column="1" DockPanel.Dock="Right" 
-                            Margin="3,5,5,5" 
-
-                            Padding="5,1,5,1">Снять сумму</Button>
+                            Margin="0,5,3,5" 
+                            Command="{Binding TakeCommand}"
+                            Content="Снять сумму"
+                            Padding="5,1,5,1"></Button>
                     <Button Grid.Row="1" 
-                            Grid.Column="0"
-                            Grid.ColumnSpan="2"
-                            Command="{Binding UnblockNonDepositCommand}"
-                            Margin="5,0,5,0">Разрешить операции</Button>
+                        Grid.Column="0"
+                        Grid.ColumnSpan="2"
+                        Command="{Binding UnblockNonDepositCommand}"
+                        Margin="5,0,5,0">Разрешить операции</Button>
                     <Button Grid.Row="2" 
                             Grid.Column="0"
                             Grid.ColumnSpan="2"
                             Margin="5,5,5,0"
                             Command="{Binding BlockNonDepositCommand}">Запретить операции</Button>
                 </Grid>
-                <TextBlock Margin="5,5,0,0" 
+                <TextBlock Margin="5,5,0,0" DockPanel.Dock="Bottom"
                            Text="{Binding NonDepositAccountBlockedTitle}"></TextBlock>
+                <TextBlock Margin="5,5,0,0" DockPanel.Dock="Bottom"
+                           Text="{Binding NonDepositAccountBalance}"></TextBlock>
             </DockPanel>
         </GroupBox>
         <Button DockPanel.Dock="Bottom"

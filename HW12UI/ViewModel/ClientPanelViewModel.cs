@@ -17,11 +17,15 @@ namespace HW12UI.ViewModel
         public string OperationSumStr { get; set; } = "0";
         public string ClientNameMsg => $"Клиент {SelectedUser.Surname} {SelectedUser.Name}";
         public ICommand DepositCommand { get; set; }
+        public ICommand TakeCommand { get; set; }
         public ICommand UnblockNonDepositCommand { get; set; }
         public ICommand BlockNonDepositCommand { get; set; }
 
         public string NonDepositAccountBlockedTitle =>
             "Статус: " + (SelectedUser.NonDepositAccount.IsBlocked() ? "Заблокирован" : "Разблокирован");
+        public string NonDepositAccountBalance =>
+            "Баланс: " + SelectedUser.NonDepositAccount.GetBalance();
+
 
 
         public ClientPanelViewModel(User selectedUser, Action clearSumTextBoxAction)
@@ -30,6 +34,7 @@ namespace HW12UI.ViewModel
             BlockNonDepositCommand = new DelegateCommand(BlockNonDeposit);
             UnblockNonDepositCommand = new DelegateCommand(UnblockNonDeposit);
             DepositCommand = new DelegateCommand(Deposit, commandExecuted: clearSumTextBoxAction);
+            TakeCommand = new DelegateCommand(Take, commandExecuted: clearSumTextBoxAction);
         }
         // нужен только для удобства работы с вьюмоделью в конструкторе xaml
         public ClientPanelViewModel() : this(new User("-", "-"), () => { }) { }
@@ -41,6 +46,17 @@ namespace HW12UI.ViewModel
                 SelectedUser.Message("Введена неправильная сумма! "); return;
             }
             SelectedUser.NonDepositAccount.Deposit(sum);
+            OnPropertyChanged(nameof(NonDepositAccountBalance));
+        }
+
+        public void Take(object obj)
+        {
+            if (!uint.TryParse(OperationSumStr, out var sum))
+            {
+                SelectedUser.Message("Введена неправильная сумма! "); return;
+            }
+            SelectedUser.NonDepositAccount.Take(sum);
+            OnPropertyChanged(nameof(NonDepositAccountBalance));
         }
 
         public void UnblockNonDeposit(object obj)
