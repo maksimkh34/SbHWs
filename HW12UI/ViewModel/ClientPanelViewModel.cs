@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using HW12UI.Core;
+using HW12UI.View;
 
 namespace HW12UI.ViewModel
 {
@@ -26,6 +27,7 @@ namespace HW12UI.ViewModel
         public ICommand OpenDepositCommand { get; }
         public ICommand WithdrawDepositCommand { get; }
         public ICommand AllowWithdrawalCommand { get; }
+        public ICommand CreateUserCommand { get; }
 
         public bool CanOpenDeposit => SelectedUser.DepositAccount.IsBlocked() && SelectedUser.DepositAccount.GetBalance() == 0;
         public bool CanWithdrawDeposit => !SelectedUser.DepositAccount.IsBlocked() && SelectedUser.DepositAccount.GetBalance() != 0;
@@ -38,6 +40,7 @@ namespace HW12UI.ViewModel
         public string DepositAccountBalance =>
             "Баланс: " + SelectedUser.DepositAccount.GetBalance();
 
+
         public ClientPanelViewModel(User selectedUser, Action clearSumTextBoxAction)
         {
             SelectedUser = selectedUser;
@@ -48,13 +51,19 @@ namespace HW12UI.ViewModel
             OpenDepositCommand = new DelegateCommand(OpenDeposit, commandExecuted: clearSumTextBoxAction);
             WithdrawDepositCommand = new DelegateCommand(WithdrawDeposit, commandExecuted: clearSumTextBoxAction);
             AllowWithdrawalCommand = new DelegateCommand(AllowDepositWithdrawal, commandExecuted: clearSumTextBoxAction);
+            CreateUserCommand = new DelegateCommand(CreateUser, commandExecuted: clearSumTextBoxAction);
         }
         // нужен только для удобства работы с вьюмоделью в конструкторе xaml
         public ClientPanelViewModel() : this(new User("-", "-"), () => { }) { }
 
+        public void CreateUser(object obj)
+        {
+            new CreateNewUserDialog().ShowDialog();
+        }
+
         public void OpenDeposit(object obj)
         {
-            if(!uint.TryParse(DepositOperationSumStr, out var sum)) {SelectedUser.Message("Введена неправильная сумма! "); return;}
+            if (!uint.TryParse(DepositOperationSumStr, out var sum)) {SelectedUser.Message("Введена неправильная сумма! "); return;}
             SelectedUser.DepositAccount.UnblockAccount(true);
             SelectedUser.DepositAccount.Deposit(sum);
             SelectedUser.DepositAccount.BlockAccount(true);

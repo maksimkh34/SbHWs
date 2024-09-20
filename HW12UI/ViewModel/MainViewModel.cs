@@ -19,7 +19,7 @@ namespace HW12UI.ViewModel
         private User? _selectedClient;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public ObservableCollection<User> Users { get; } = new(Program.Users);
+        public ObservableCollection<User> Users => Program.Users;
 
         public MainViewModel()
         {
@@ -27,6 +27,7 @@ namespace HW12UI.ViewModel
             {
                 user.SetMsg(Message);
             }
+            SelectClientCommand = new DelegateCommand(SelectClient);
         }
 
         public void Message(string msg)
@@ -46,7 +47,7 @@ namespace HW12UI.ViewModel
             }
         }
 
-        public ICommand SelectClientCommand { get; } = new DelegateCommand(SelectClient, null);
+        public ICommand SelectClientCommand { get; }
         public Visibility IsClientWarningDisplayable => SelectedClient == null ? Visibility.Visible : Visibility.Collapsed;
         public bool IsClientWarningDisplayableBtn => SelectedClient != null;
 

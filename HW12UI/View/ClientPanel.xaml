@@ -93,6 +93,8 @@
             </StackPanel>
         </GroupBox>
         <Button DockPanel.Dock="Bottom"
-                Margin="5" Padding="5,1,5,1">Добавить нового клиента</Button>
+                Margin="5" 
+                Command="{Binding CreateUserCommand}"
+                Padding="5,1,5,1" >Добавить нового клиента</Button>
     </DockPanel>
 </Window>

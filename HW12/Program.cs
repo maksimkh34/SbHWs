@@ -1,8 +1,10 @@
-﻿namespace HW12
+﻿using System.Collections.ObjectModel;
+
+namespace HW12
 {
     public static class Program
     {
-        public static readonly List<User> Users = LoadUsers();
+        public static readonly ObservableCollection<User> Users = LoadUsers();
         private static int CurrentUserIndex { get; set; }
 
         public static User CurrentUser
@@ -131,7 +133,7 @@
             }
         }
 
-        private static List<User> LoadUsers()
+        private static ObservableCollection<User> LoadUsers()
         {
             return [new User("123123", "312321"), new User("ame", "duo"), new User("alex", "doe")];
         }
