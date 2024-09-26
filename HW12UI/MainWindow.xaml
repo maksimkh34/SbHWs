@@ -11,6 +11,9 @@
         <vms:MainViewModel></vms:MainViewModel>
     </Window.DataContext>
     <StackPanel>
+        <Menu VerticalAlignment="Top">
+            <MenuItem Header="Просмотреть список операций" Click="MenuItem_OnClick"></MenuItem>
+        </Menu>
         <TextBlock FontWeight="Bold"
                    HorizontalAlignment="Center"
                    Margin="5"

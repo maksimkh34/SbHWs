@@ -7,8 +7,8 @@
 
         public Action<string>? MessageAction = message;
 
-        public UserAccount<DepositAccount> DepositAccount { get; } = new(message ?? Console.WriteLine);
-        public UserAccount<NonDepositAccount> NonDepositAccount { get; } = new(message ?? Console.WriteLine);
+        public UserAccount<DepositAccount> DepositAccount { get; } = new(message ?? Console.WriteLine, surname + " " + name);
+        public UserAccount<NonDepositAccount> NonDepositAccount { get; } = new(message ?? Console.WriteLine, surname + " " + name);
 
         public void SetMsg(Action<string> action)
         {

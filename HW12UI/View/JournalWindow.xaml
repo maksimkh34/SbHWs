@@ -1,0 +1,16 @@
+﻿<Window x:Class="HW12UI.View.JournalWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HW12UI.View"
+        mc:Ignorable="d"
+        xmlns:vms="clr-namespace:HW12UI.ViewModel"
+        Loaded="JournalWindow_OnLoaded"
+        Title="JournalWindow" SizeToContent="WidthAndHeight">
+    <Window.DataContext>
+        <vms:JournalViewModel></vms:JournalViewModel>
+    </Window.DataContext>
+    <ListView ItemsSource="{Binding Journal}">
+    </ListView>
+</Window>

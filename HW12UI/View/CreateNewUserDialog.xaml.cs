@@ -3,7 +3,7 @@ using HW12UI.ViewModel;
 
 namespace HW12UI.View
 {
-    public partial class CreateNewUserDialog : Window
+    public partial class CreateNewUserDialog
     {
         private CreateNewUserViewModel ViewModel
         {

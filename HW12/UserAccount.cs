@@ -5,21 +5,32 @@
         private readonly T _account;
         public bool IsBlocked() => _account.GetBlocked();
         public uint GetBalance() => _account.GetBalance();
+        public string Username;
 
-        public UserAccount(Action<string> message, uint balance)
+        public UserAccount(Action<string> message, uint balance, string username)
         {
             Message = message;
+            Username = username;
             T acc = new();
             acc.Deposit(balance);
             _account = acc;
         }
             
-        public UserAccount(Action<string> message) : this(message, 0) { }
+        public UserAccount(Action<string> message, string username) : this(message, 0, username) { }
 
         public Action<string> Message;
 
-        public void BlockAccount(bool silent = false) { _account.BlockAccount(); if (!silent) Message.Invoke("Операции запрещены! ");}
-        public void UnblockAccount(bool silent = false) { _account.UnblockAccount(); if(!silent) Message.Invoke("Операции разрешены! "); }
+        public void BlockAccount(bool silent = false) 
+        { _account.BlockAccount(); 
+            Journal.Register(new AccountClosedArgs(typeof(T) == typeof(DepositAccount), Username));
+            if (!silent) Message.Invoke("Операции запрещены! ");}
+
+        public void UnblockAccount(bool silent = false)
+        {
+            _account.UnblockAccount();
+            Journal.Register(new AccountOpenedArgs(typeof(T) == typeof(DepositAccount), Username));
+            if (!silent) Message.Invoke("Операции разрешены! ");
+        }
 
         public void Deposit(uint amount)
         {
@@ -27,6 +38,7 @@
             {
                 case OperationResultEnum.Success:
                     Message("На счет зачислено " + amount);
+                    Journal.Register(new DepositedArgs(amount, Username));
                     break;
                 case OperationResultEnum.Rejected:
                     Message("Операция запрещена. ");
@@ -62,6 +74,7 @@
             {
                 case OperationResultEnum.Success:
                     Message($"Пользователю {user.Name} переведено {amount}. ");
+                    Journal.Register(new TransferredArgs(amount, Username, user.Surname + " " + user.Name));
                     break;
                 case OperationResultEnum.Rejected:
                     Message("Операция запрещена. ");

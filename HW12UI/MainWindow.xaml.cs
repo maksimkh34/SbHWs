@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using HW12UI.View;
 
 namespace HW12UI
 {
@@ -22,6 +23,11 @@ namespace HW12UI
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void MenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            new JournalWindow().ShowDialog();
         }
     }
 }
