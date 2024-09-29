@@ -52,38 +52,48 @@
 
         public void Take(uint amount)
         {
-            switch (_account.Take(amount).Result)
+            try
             {
-                case OperationResultEnum.Success:
-                    Message("Со счета списано: " + amount);
-                    break;
-                case OperationResultEnum.Rejected:
-                    Message("Операция запрещена. ");
-                    break;
-                case OperationResultEnum.NotEnoughBalance:
-                    Message("Недостаточно баланса. ");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                switch (_account.Take(amount).Result)
+                {
+                    case OperationResultEnum.Success:
+                        Message("Со счета списано: " + amount);
+                        break;
+                    case OperationResultEnum.Rejected:
+                        Message("Операция запрещена. ");
+                        break;
+                    case OperationResultEnum.NotEnoughBalance:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            catch (Account.NotEnoughBalanceException)
+            {
+                Message("Недостаточно баланса. ");
             }
         }
 
         public void Transfer(User user, uint amount)
         {
-            switch (_account.TransferTo(user.NonDepositAccount._account, amount).Result)
+            try
             {
-                case OperationResultEnum.Success:
-                    Message($"Пользователю {user.Name} переведено {amount}. ");
-                    Journal.Register(new TransferredArgs(amount, Username, user.Surname + " " + user.Name));
-                    break;
-                case OperationResultEnum.Rejected:
-                    Message("Операция запрещена. ");
-                    break;
-                case OperationResultEnum.NotEnoughBalance:
-                    Message("Недостаточно баланса. ");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                switch (_account.TransferTo(user.NonDepositAccount._account, amount).Result)
+                {
+                    case OperationResultEnum.Success:
+                        Message($"Пользователю {user.Name} переведено {amount}. ");
+                        Journal.Register(new TransferredArgs(amount, Username, user.Surname + " " + user.Name));
+                        break;
+                    case OperationResultEnum.Rejected:
+                        Message("Операция запрещена. ");
+                        break;
+                    case OperationResultEnum.NotEnoughBalance:
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            catch (Account.NotEnoughBalanceException)
+            {
+                Message("Недостаточно баланса. ");
             }
         }
     }

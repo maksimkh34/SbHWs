@@ -21,7 +21,7 @@
         public virtual OperationResult Take(uint amount) 
         {
             if (_blocked) return new OperationResult(OperationResultEnum.Rejected, 0);
-            if ((int)balance - amount < 0) return new OperationResult(OperationResultEnum.NotEnoughBalance, 0);
+            if ((int)balance - amount < 0) throw new NotEnoughBalanceException();
             balance -= amount;
             return new OperationResult(OperationResultEnum.Success, amount);
         }
@@ -29,10 +29,17 @@
         public virtual OperationResult TransferTo(Account account, uint amount) 
         { 
             if(_blocked) return new OperationResult(OperationResultEnum.Rejected, 0);
-            if(Take(amount) == new OperationResult(OperationResultEnum.NotEnoughBalance, 0)) return new OperationResult(OperationResultEnum.NotEnoughBalance, 0);
+            Take(amount);
             return account.Deposit(amount) == new OperationResult(OperationResultEnum.Rejected, 0) ? 
                 new OperationResult(OperationResultEnum.Rejected, 0) : 
                 new OperationResult(OperationResultEnum.Success, amount);
+        }
+
+        public class NotEnoughBalanceException : Exception
+        {
+            public NotEnoughBalanceException()
+            {}
+            public NotEnoughBalanceException(string msg) : base(msg) {}
         }
     }
 

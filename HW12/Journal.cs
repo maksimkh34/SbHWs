@@ -29,6 +29,7 @@ namespace HW12
     public abstract record JournalEntryArgs(JournalEntryType Type)
     {
         public JournalEntryType Type = Type;
+        public DateTime Dt = DateTime.Now;
     }
 
     public record AccountOpenedArgs(bool IsDeposit, string Username) : JournalEntryArgs(JournalEntryType.AccountOpened)
@@ -38,7 +39,7 @@ namespace HW12
 
         public override string ToString()
         {
-            return $"{(IsDeposit ? "Д" : "Нед")}епозитный аккаунт для пользователя {Username} открыт. ";
+            return $"({Dt}) {(IsDeposit ? "Д" : "Нед")}епозитный аккаунт для пользователя {Username} открыт. ";
         }
     }
 
@@ -49,7 +50,7 @@ namespace HW12
 
         public override string ToString()
         {
-            return $"{(IsDeposit ? "Д" : "Нед")}епозитный аккаунт для пользователя {Username} закрыт. ";
+            return $"({Dt}) {(IsDeposit ? "Д" : "Нед")}епозитный аккаунт для пользователя {Username} закрыт. ";
         }
     }
 
@@ -60,7 +61,7 @@ namespace HW12
 
         public override string ToString()
         {
-            return $"На аккаунт {Username} зачислено {Sum}. ";
+            return $"({Dt}) На аккаунт {Username} зачислено {Sum}. ";
         }
     }
 
@@ -72,7 +73,7 @@ namespace HW12
 
         public override string ToString()
         {
-            return $"С аккаунта {PayerUsername} переведено {Sum} на аккаунт {ReceiverUsername}. ";
+            return $"({Dt}) С аккаунта {PayerUsername} переведено {Sum} на аккаунт {ReceiverUsername}. ";
         }
     }
 
@@ -84,7 +85,7 @@ namespace HW12
 
         public override string ToString()
         {
-            return $"{ChangedFieldName} для пользователя {Username} изменено ({Changes.oldValue} => {Changes.newValue})";
+            return $"({Dt}) {ChangedFieldName} для пользователя {Username} изменено ({Changes.oldValue} => {Changes.newValue})";
         }
     }
 }
