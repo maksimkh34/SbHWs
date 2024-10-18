@@ -36,7 +36,37 @@ public partial class MainWindow
         });
         
         await Task.WhenAll(localConTask, oleConTask);
+
+        var strClients = Select<SqlConnection, SqlCommand>(LocalConnection!, "Clients");
+        var clients = Util.Parse<Client>(strClients);
+        var strSales = Select<OleDbConnection, OleDbCommand>(OleDbConnection!, "ProductSales");
+        var sales = Util.Parse<ProductSaleEntry>(strSales);
     }
+
+    private static string Select<TConnection, TCommand>(TConnection conn, string selectionTarget)
+        where TConnection : DbConnection
+        where TCommand : DbCommand, new()
+    {
+        var sql = "SELECT * FROM " + selectionTarget;
+        var entries = string.Empty;
+
+        using var command = (TCommand)Activator.CreateInstance(typeof(TCommand), sql, conn)!;
+        if (command == null)
+            throw new InvalidOperationException("Command creation failed.");
+
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                entries += reader[i] + "\t";
+            }
+            entries += "\r\n";
+        }
+        
+        return entries;
+    }
+
 
     private static ConnectionInfo<SqlConnection> ConnectLocal()
     {
@@ -53,7 +83,7 @@ public partial class MainWindow
         var localConnection = new SqlConnection(builder.ConnectionString);
         localConnection.Open();
         
-        Thread.Sleep(3000);
+        //Thread.Sleep(3000);
         return new ConnectionInfo<SqlConnection>(builder.ConnectionString, localConnection.State.ToString(),
             localConnection);
     }
@@ -78,7 +108,7 @@ public partial class MainWindow
         var oleConnection = new OleDbConnection(dbConnectionStringBuilder.ConnectionString);
         oleConnection.Open();
         
-        Thread.Sleep(5000);
+        //Thread.Sleep(5000);
         return new ConnectionInfo<OleDbConnection>(dbConnectionStringBuilder.ConnectionString, oleConnection.State.ToString(), oleConnection);
     }
 
@@ -95,5 +125,4 @@ public partial class MainWindow
         public string ConnectionString { get; } = connectionString;
         public string Status { get; } = status;
     }
-
 }
