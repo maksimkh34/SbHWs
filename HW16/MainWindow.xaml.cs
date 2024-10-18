@@ -50,21 +50,29 @@ public partial class MainWindow
         var sql = "SELECT * FROM " + selectionTarget;
         var entries = string.Empty;
 
-        using var command = (TCommand)Activator.CreateInstance(typeof(TCommand), sql, conn)!;
-        if (command == null)
-            throw new InvalidOperationException("Command creation failed.");
-
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
+        try
         {
-            for (var i = 0; i < reader.FieldCount; i++)
+            using var command = (TCommand)Activator.CreateInstance(typeof(TCommand), sql, conn)!;
+            if (command == null)
+                throw new InvalidOperationException("Command creation failed.");
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
             {
-                entries += reader[i] + "\t";
+                for (var i = 0; i < reader.FieldCount; i++)
+                {
+                    entries += reader[i] + "\t";
+                }
+                entries += "\r\n";
             }
-            entries += "\r\n";
-        }
         
-        return entries;
+            return entries;
+        }
+        catch (MissingMethodException e)
+        {
+            throw new MissingMethodException($"Error: {typeof(TCommand).Name}" +
+                                             $" is not command for {typeof(TConnection).Name}\n" + e.Message, e);
+        }
     }
 
 
