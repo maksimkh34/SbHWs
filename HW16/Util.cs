@@ -1,4 +1,8 @@
-﻿namespace HW16;
+﻿using System.Data.Common;
+using System.Data.OleDb;
+using System.Data.SqlClient;
+
+namespace HW16;
 
 public static class Util
 {
@@ -22,22 +26,39 @@ public static class Util
         }
         return collection;
     }
+    
+    public static (DbConnection, Type) GetDbTypes(ICanBeInsertedToDatabase obj)
+    {
+        return obj.Table switch
+        {
+            Database.Tables.Clients => (Database.LocalConnection, typeof(SqlCommand)),
+            Database.Tables.ProductSales => (Database.OleDbConnection, typeof(OleDbCommand)),
+            _ => throw new InvalidOperationException("Unknown table type")
+        };
+    }
 }
 
-public class Client
+public class Client : ICanBeInsertedToDatabase
 {
-    public string Id { get; set; }
-    public string Surname { get; set; }
-    public string Name { get; set; }
-    public string Patronymic { get; set; }
-    public string PhoneNumber { get; set; }
-    public string Email { get; set; }
+    public int Id { get; set; }
+    public required string Surname { get; set; }
+    public required string Name { get; set; }
+    public required string Patronymic { get; set; }
+    public required string PhoneNumber { get; set; }
+    public required string Email { get; set; }
+    public Database.Tables Table { get; set; } = Database.Tables.Clients;
 }
 
-public class ProductSaleEntry
+public class ProductSaleEntry : ICanBeInsertedToDatabase
 {
-    public string Id { get; set; }
-    public string Email { get; set; }
-    public string ProductId { get; set; }
-    public string ProductName { get; set; }
+    public int Id { get; set; }
+    public required string Email { get; set; }
+    public required int ProductId { get; set; }
+    public required string ProductName { get; set; }
+    public Database.Tables Table { get; set; } = Database.Tables.ProductSales;
+}
+
+public interface ICanBeInsertedToDatabase
+{
+    public Database.Tables Table { get; set; }
 }
