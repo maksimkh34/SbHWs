@@ -19,6 +19,7 @@ public partial class MainWindow
     private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
     {
         await Database.Initialize();
+        Database.Select<ProductSaleEntry>();
     }
     
 }

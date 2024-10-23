@@ -41,20 +41,20 @@ public static class Util
 public class Client : ICanBeInsertedToDatabase
 {
     public int Id { get; set; }
-    public required string Surname { get; set; }
-    public required string Name { get; set; }
-    public required string Patronymic { get; set; }
-    public required string PhoneNumber { get; set; }
-    public required string Email { get; set; }
+    public string Surname { get; set; }
+    public string Name { get; set; }
+    public string Patronymic { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Email { get; set; }
     public Database.Tables Table { get; set; } = Database.Tables.Clients;
 }
 
 public class ProductSaleEntry : ICanBeInsertedToDatabase
 {
     public int Id { get; set; }
-    public required string Email { get; set; }
-    public required int ProductId { get; set; }
-    public required string ProductName { get; set; }
+    public string Email { get; set; }
+    public int ProductId { get; set; }
+    public string ProductName { get; set; }
     public Database.Tables Table { get; set; } = Database.Tables.ProductSales;
 }
 

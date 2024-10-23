@@ -70,37 +70,45 @@ public static class Database
         return new ConnectionInfo<OleDbConnection>(oleConnection);
     }
     
-    public static string Select<TConnection, TCommand>(TConnection conn, string selectionTarget)
-        where TConnection : DbConnection
-        where TCommand : DbCommand, new()
+    public static List<TObject> Select<TObject>() where TObject : ICanBeInsertedToDatabase, new()
     {
-        var sql = "SELECT * FROM " + selectionTarget;
-        var entries = string.Empty;
+        var objectToSelect = new TObject();
+        var (conn, commandType) = Util.GetDbTypes(objectToSelect);
+        var command = (DbCommand)Activator.CreateInstance(commandType)!;
 
-        try
+        // Получаем список колонок, исключая "Table"
+        var columns = objectToSelect.GetType().GetProperties()
+            .Where(p => p.Name != "Table")
+            .Aggregate("", (current, propertyInfo) => current + propertyInfo.Name + ", ")
+            .TrimEnd(',', ' ');
+
+        var sql = $"SELECT {columns} FROM {objectToSelect.Table};";
+        command.CommandText = sql;
+        command.Connection = conn;
+
+        using var reader = command.ExecuteReader();
+
+        var results = new List<TObject>();
+        while (reader.Read())
         {
-            using var command = (TCommand)Activator.CreateInstance(typeof(TCommand), sql, conn)!;
-            if (command == null)
-                throw new InvalidOperationException("Command creation failed.");
-
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
+            var obj = new TObject();
+            foreach (var propertyInfo in obj.GetType().GetProperties())
             {
-                for (var i = 0; i < reader.FieldCount; i++)
-                {
-                    entries += reader[i] + "\t";
-                }
-                entries += "\r\n";
+                if (propertyInfo.Name == "Table") continue;
+
+                var value = reader[propertyInfo.Name];
+                if (value == DBNull.Value) continue;
+                var propertyType = propertyInfo.PropertyType;
+                var convertedValue = Convert.ChangeType(value, propertyType);
+                if(convertedValue is string stringValue) convertedValue = stringValue.TrimEnd();
+                propertyInfo.SetValue(obj, convertedValue);
             }
-        
-            return entries;
+            results.Add(obj);
         }
-        catch (MissingMethodException e)
-        {
-            throw new MissingMethodException($"Error: {typeof(TCommand).Name}" +
-                                             $" is not command for {typeof(TConnection).Name}\n" + e.Message, e);
-        }
+        return results;
     }
+
+
 
     public static void Insert(ICanBeInsertedToDatabase objectToInsert)
     {
