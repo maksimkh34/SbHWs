@@ -21,6 +21,8 @@ public static partial class Database
         {
             return !result.Success;
         }
+        
+        public static bool operator !(OperationResult result) => !result.Success;
     }
 
     private class ConnectionInfo<T>(T connection)
