@@ -4,10 +4,10 @@ using System.Data.SqlClient;
 
 namespace HW16;
 
-public static class Database
+public static partial class Database
 {
-    public static SqlConnection LocalConnection { get; set; } = null!;
-    public static OleDbConnection OleDbConnection { get; set; } = null!;
+    public static SqlConnection LocalConnection { get; private set; } = null!;
+    public static OleDbConnection OleDbConnection { get; private set; } = null!;
 
     public static async Task Initialize()
     {
@@ -24,13 +24,20 @@ public static class Database
         });
         
         await Task.WhenAll(localConTask, oleConTask);
-
-        // var strClients = Database.Select<SqlConnection, SqlCommand>(LocalConnection!, "Clients");
-        // var clients = Util.Parse<Client>(strClients);
-        // var strSales = Database.Select<OleDbConnection, OleDbCommand>(OleDbConnection!, "ProductSales");
-        // var sales = Util.Parse<ProductSaleEntry>(strSales);
     }
     
+    private static ConnectionInfo<OleDbConnection> ConnectAccess()
+    {
+        var dbConnectionStringBuilder = new OleDbConnectionStringBuilder
+        {
+            Provider = "Microsoft.ACE.OLEDB.12.0",
+            DataSource = "D:\\TestDb.accdb"
+        };
+        var oleConnection = new OleDbConnection(dbConnectionStringBuilder.ConnectionString);
+        oleConnection.Open();
+        
+        return new ConnectionInfo<OleDbConnection>(oleConnection);
+    }
     
     private static ConnectionInfo<SqlConnection> ConnectLocal()
     {
@@ -50,79 +57,252 @@ public static class Database
         return new ConnectionInfo<SqlConnection>(localConnection);
     }
 
-    private class ConnectionInfo<T>(T connection)
-        where T : DbConnection
-    {
-        public T Connection { get; } = connection;
-    }
-    
+    public static async Task<UpdateOperationResult> UpdateAsync(ICanBeInsertedToDatabase objectToUpdate)
+{
+    var conn = objectToUpdate.GetConnection();
+    var commandType = objectToUpdate.GetType();
+    var command = (DbCommand)Activator.CreateInstance(commandType)!;
 
-    private static ConnectionInfo<OleDbConnection> ConnectAccess()
+    var columns = objectToUpdate.GetType().GetProperties()
+        .Where(p => p.Name != "Id" && p.Name != "Table")
+        .Select((propertyInfo, index) => $"{propertyInfo.Name} = @param{index}")
+        .Aggregate("", (current, param) => current + param + ", ")
+        .TrimEnd(',', ' ');
+
+    var sql = $"UPDATE {objectToUpdate.Table} SET {columns} WHERE Id = @Id;";
+    command.CommandText = sql;
+    command.Connection = conn;
+
+    var parameterIndex = 0;
+    foreach (var propertyInfo in objectToUpdate.GetType().GetProperties())
     {
-        var dbConnectionStringBuilder = new OleDbConnectionStringBuilder
+        if (propertyInfo.Name == "Table") continue;
+        var value = propertyInfo.GetValue(objectToUpdate);
+        if (propertyInfo.Name != "Id" && !IsValidValue(value, propertyInfo))
         {
-            Provider = "Microsoft.ACE.OLEDB.12.0",
-            DataSource = "D:\\TestDb.accdb"
-        };
-        var oleConnection = new OleDbConnection(dbConnectionStringBuilder.ConnectionString);
-        oleConnection.Open();
-        
-        return new ConnectionInfo<OleDbConnection>(oleConnection);
+            return new UpdateOperationResult
+            {
+                Success = false,
+                Message = $"Invalid value for {propertyInfo.Name}",
+                ErrorCode = UpdateErrorCode.ValidationError
+            };
+        }
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = propertyInfo.Name == "Id" ? "@Id" : $"@param{parameterIndex++}";
+        parameter.Value = value ?? DBNull.Value;
+        command.Parameters.Add(parameter);
     }
-    
-    public static List<TObject> Select<TObject>() where TObject : ICanBeInsertedToDatabase, new()
+
+    try
     {
-        var objectToSelect = new TObject();
-        var (conn, commandType) = Util.GetDbTypes(objectToSelect);
-        var command = (DbCommand)Activator.CreateInstance(commandType)!;
+        var rowsAffected = await command.ExecuteNonQueryAsync();
+        return rowsAffected switch
+        {
+            0 => new UpdateOperationResult
+            {
+                Success = false,
+                Message = "Record not found.",
+                ErrorCode = UpdateErrorCode.RecordNotFound
+            },
+            1 => new UpdateOperationResult { Success = true, Message = null, ErrorCode = null },
+            _ => new UpdateOperationResult
+            {
+                Success = true,
+                Message = null,
+                ErrorCode = null,
+                MultipleRowsAffected = true
+            }
+        };
+    }
+    catch (System.Data.DBConcurrencyException)
+    {
+        return new UpdateOperationResult
+        {
+            Success = false,
+            Message = "Concurrency violation.",
+            ErrorCode = UpdateErrorCode.ConcurrencyViolation
+        };
+    }
+    catch (Exception ex)
+    {
+        return new UpdateOperationResult
+        {
+            Success = false,
+            Message = $"Update failed: {ex.Message}",
+            ErrorCode = UpdateErrorCode.DatabaseError
+        };
+    }
+}
 
-        // Получаем список колонок, исключая "Table"
-        var columns = objectToSelect.GetType().GetProperties()
-            .Where(p => p.Name != "Table")
-            .Aggregate("", (current, propertyInfo) => current + propertyInfo.Name + ", ")
-            .TrimEnd(',', ' ');
 
-        var sql = $"SELECT {columns} FROM {objectToSelect.Table};";
-        command.CommandText = sql;
-        command.Connection = conn;
+    public static async Task<DeleteOperationResult> DeleteAsync(ICanBeInsertedToDatabase objectToDelete)
+{
+    var conn = objectToDelete.GetConnection();
+    var commandType = objectToDelete.GetType();
+    var command = (DbCommand)Activator.CreateInstance(commandType)!;
 
-        using var reader = command.ExecuteReader();
+    var conditions = objectToDelete.GetType().GetProperties()
+        .Where(p => p.Name != "Table")
+        .Select((propertyInfo, index) => $"{propertyInfo.Name} = @param{index}")
+        .Aggregate("", (current, param) => current + param + " AND ")
+        .TrimEnd(" AND ".ToCharArray());
 
-        var results = new List<TObject>();
-        while (reader.Read())
+    var sql = $"DELETE FROM {objectToDelete.Table} WHERE {conditions};";
+    command.CommandText = sql;
+    command.Connection = conn;
+
+    var parameterIndex = 0;
+    foreach (var propertyInfo in objectToDelete.GetType().GetProperties())
+    {
+        if (propertyInfo.Name == "Table") continue;
+        var value = propertyInfo.GetValue(objectToDelete);
+        if (!IsValidValue(value, propertyInfo))
+        {
+            return new DeleteOperationResult
+            {
+                Success = false,
+                Message = $"Invalid value for {propertyInfo.Name}",
+                ErrorCode = DeleteErrorCode.ValidationError
+            };
+        }
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = $"@param{parameterIndex++}";
+        parameter.Value = value ?? DBNull.Value;
+        command.Parameters.Add(parameter);
+    }
+
+    try
+    {
+        var rowsAffected = await command.ExecuteNonQueryAsync();
+        return rowsAffected switch
+        {
+            0 => new DeleteOperationResult
+            {
+                Success = false,
+                Message = "Record not found.",
+                ErrorCode = DeleteErrorCode.RecordNotFound
+            },
+            1 => new DeleteOperationResult { Success = true, Message = null, ErrorCode = null },
+            _ => new DeleteOperationResult { Success = true, Message = null, ErrorCode = null, MultipleRowsAffected = true}
+        };
+    }
+    catch (System.Data.DBConcurrencyException)
+    {
+        return new DeleteOperationResult
+        {
+            Success = false,
+            Message = "Concurrency violation.",
+            ErrorCode = DeleteErrorCode.ConcurrencyViolation
+        };
+    }
+    catch (Exception ex)
+    {
+        return new DeleteOperationResult
+        {
+            Success = false,
+            Message = $"Delete failed: {ex.Message}",
+            ErrorCode = DeleteErrorCode.DatabaseError
+        };
+    }
+}
+    
+    public static async Task<SelectOperationResult<TObject>> SelectAsync<TObject>() where TObject : ICanBeInsertedToDatabase, new()
+{
+    var objectToSelect = new TObject();
+    var conn = objectToSelect.GetConnection();
+    var commandType = objectToSelect.GetType();
+    var command = (DbCommand)Activator.CreateInstance(commandType)!;
+
+    var columns = objectToSelect.GetType().GetProperties()
+        .Where(p => p.Name != "Table")
+        .Aggregate("", (current, propertyInfo) => current + propertyInfo.Name + ", ")
+        .TrimEnd(',', ' ');
+
+    var sql = $"SELECT {columns} FROM {objectToSelect.Table};";
+    command.CommandText = sql;
+    command.Connection = conn;
+
+    var results = new SelectOperationResult<TObject>();
+
+    try
+    {
+        await using var reader = await command.ExecuteReaderAsync();
+        if (!reader.HasRows)
+        {
+            results.Success = false;
+            results.Message = "No records found.";
+            results.ErrorCode = SelectErrorCode.RecordNotFound;
+            return results;
+        }
+
+        while (await reader.ReadAsync())
         {
             var obj = new TObject();
             foreach (var propertyInfo in obj.GetType().GetProperties())
             {
                 if (propertyInfo.Name == "Table") continue;
-
                 var value = reader[propertyInfo.Name];
                 if (value == DBNull.Value) continue;
+
+                // Валидация данных
+                if (!IsValidValue(value, propertyInfo))
+                {
+                    results.Success = false;
+                    results.Message = $"Invalid value for {propertyInfo.Name}";
+                    results.ErrorCode = SelectErrorCode.ValidationError;
+                    return results;
+                }
+
                 var propertyType = propertyInfo.PropertyType;
                 var convertedValue = Convert.ChangeType(value, propertyType);
-                if(convertedValue is string stringValue) convertedValue = stringValue.TrimEnd();
+                if (convertedValue is string stringValue) convertedValue = stringValue.TrimEnd();
                 propertyInfo.SetValue(obj, convertedValue);
             }
-            results.Add(obj);
+            results.Data.Add(obj);
         }
-        return results;
+
+        results.Success = true;
+        results.Message = null;
+        results.ErrorCode = null;
+    }
+    catch (SqlException ex) when (ex.Number == -2)
+    {
+        results.Success = false;
+        results.Message = $"Select failed: {ex.Message}";
+        results.ErrorCode = SelectErrorCode.TimeoutError;
+    }
+    catch (Exception ex)
+    {
+        results.Success = false;
+        results.Message = $"Select failed: {ex.Message}";
+        results.ErrorCode = SelectErrorCode.DatabaseError;
     }
 
+    return results;
+}
 
 
-    public static void Insert(ICanBeInsertedToDatabase objectToInsert)
+    
+    public static async Task<InsertOperationResult> Insert(ICanBeInsertedToDatabase objectToInsert)
     {
-        var (conn, commandType) = Util.GetDbTypes(objectToInsert);
+        var conn = objectToInsert.GetConnection();
+        var commandType = objectToInsert.GetType();
         var command = (DbCommand)Activator.CreateInstance(commandType)!;
 
-        var columns = objectToInsert.GetType().GetProperties().Aggregate("", (current, propertyInfo) => current + propertyInfo.Name + ", ").TrimEnd(',', ' ');
+        var columns = objectToInsert.GetType().GetProperties()
+            .Aggregate("", (current, propertyInfo) => current + propertyInfo.Name + ", ")
+            .TrimEnd(',', ' ');
+
         if (columns.StartsWith("Id, ")) columns = columns[4..];
         columns = columns.Replace(", Table", "");
-        var values = objectToInsert.GetType().GetProperties().Where(p => p.Name != "Id" && p.Name != "Table")
-            .Select((_, index) => $"@param{index}").Aggregate("", (current, param) => current + param + ", ").TrimEnd(',', ' ');
+
+        var values = objectToInsert.GetType().GetProperties()
+            .Where(p => p.Name != "Id" && p.Name != "Table")
+            .Select((_, index) => $"@param{index}")
+            .Aggregate("", (current, param) => current + param + ", ")
+            .TrimEnd(',', ' ');
 
         var sql = $"INSERT INTO {objectToInsert.Table} ({columns}) VALUES ({values});";
-
         command.CommandText = sql;
         command.Connection = conn;
 
@@ -137,18 +317,15 @@ public static class Database
             command.Parameters.Add(parameter);
         }
 
-        if (command == null)
-            throw new InvalidOperationException("Command creation failed.");
-
-        command.ExecuteNonQuery();
+        try
+        {
+            await command.ExecuteNonQueryAsync();
+            return new InsertOperationResult { Success = true, Message = null };
+        }
+        catch (Exception ex)
+        {
+            return new InsertOperationResult { Success = false, Message = $"Insert failed: {ex.Message}" };
+        }
     }
 
-
-
-
-    public enum Tables
-    {
-        ProductSales,
-        Clients
-    }
 }

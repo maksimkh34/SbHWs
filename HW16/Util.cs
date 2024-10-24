@@ -26,16 +26,6 @@ public static class Util
         }
         return collection;
     }
-    
-    public static (DbConnection, Type) GetDbTypes(ICanBeInsertedToDatabase obj)
-    {
-        return obj.Table switch
-        {
-            Database.Tables.Clients => (Database.LocalConnection, typeof(SqlCommand)),
-            Database.Tables.ProductSales => (Database.OleDbConnection, typeof(OleDbCommand)),
-            _ => throw new InvalidOperationException("Unknown table type")
-        };
-    }
 }
 
 public class Client : ICanBeInsertedToDatabase
@@ -47,6 +37,15 @@ public class Client : ICanBeInsertedToDatabase
     public string PhoneNumber { get; set; }
     public string Email { get; set; }
     public Database.Tables Table { get; set; } = Database.Tables.Clients;
+    public DbConnection GetConnection()
+    {
+        return Database.LocalConnection;
+    }
+
+    public Type GetCommandType()
+    {
+        return typeof(SqlCommand);
+    }
 }
 
 public class ProductSaleEntry : ICanBeInsertedToDatabase
@@ -56,9 +55,21 @@ public class ProductSaleEntry : ICanBeInsertedToDatabase
     public int ProductId { get; set; }
     public string ProductName { get; set; }
     public Database.Tables Table { get; set; } = Database.Tables.ProductSales;
+    public DbConnection GetConnection()
+    {
+        return Database.OleDbConnection;
+    }
+
+    public Type GetCommandType()
+    {
+        return typeof(OleDbCommand);
+    }
 }
 
 public interface ICanBeInsertedToDatabase
 {
     public Database.Tables Table { get; set; }
+    DbConnection GetConnection();
+    Type GetCommandType();
+
 }
