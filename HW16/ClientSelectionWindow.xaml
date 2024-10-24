@@ -21,6 +21,7 @@
 
 
     <StackPanel Orientation="Vertical">
+        <Button Margin="15,5,0,0" Width="140" HorizontalAlignment="Left" Click="ButtonBase_OnClick">Обновить таблицу</Button>
         <TextBlock Margin="5,5,0,3">Поиск по параметрам</TextBlock>
         
         <StackPanel Orientation="Horizontal" Margin="6,0,0,0">
@@ -42,6 +43,7 @@
                   SelectedIndex="{Binding SelectedClientIndex}"
                   CanUserAddRows="False" CanUserDeleteRows="False" 
                   x:Name="ClientsDataGrid"
+                  IsReadOnly="True"
                   SelectionChanged="Selector_OnSelectionChanged"
                   CanUserReorderColumns="False" AutoGenerateColumns="False">
             <DataGrid.ContextMenu>
@@ -60,6 +62,6 @@
             </DataGrid.Columns>
         </DataGrid>
         <Button Margin="5,5,5,0" Click="SelectClient_OnClick">Выбрать клиента</Button>
-        <Button Margin="5,5,5,5" Click="SelectClient_OnClick">Зарегистрировать клиента</Button>
+        <Button Margin="5,5,5,5" Click="RegisterButton_OnClick">Зарегистрировать клиента</Button>
     </StackPanel>
 </Window>

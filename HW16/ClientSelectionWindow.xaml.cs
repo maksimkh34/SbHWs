@@ -8,6 +8,12 @@ namespace HW16;
 
 public partial class ClientSelectionWindow
 {
+    private ClientSelectionViewModel ViewModel
+    {
+        get => (ClientSelectionViewModel)DataContext;
+        set => DataContext = value;
+    }
+    
     public ClientSelectionWindow()
     {
         InitializeComponent();
@@ -21,25 +27,29 @@ public partial class ClientSelectionWindow
     private async void RegisterButton_OnClick(object sender, RoutedEventArgs e)
     {
         new RegisterUser().ShowDialog();
-        await ((ClientSelectionViewModel)DataContext).RefreshClients();
+        await ViewModel.RefreshClients();
     }
 
     private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        ((ClientSelectionViewModel)DataContext).SelectedClients = ClientsDataGrid.SelectedItems.Cast<Client>().ToList();
+        ViewModel.SelectedClients = ClientsDataGrid.SelectedItems.Cast<Client>().ToList();
     }
 
     private void SelectClient_OnClick(object sender, RoutedEventArgs e)
     {
-        var client = ((ClientSelectionViewModel)DataContext).GetSelectedClient();
+        var client = ViewModel.GetSelectedClient();
         if (client == null)
         {
             MessageBox.Show("Выберите ровно одного клиента. ", "Предупреждение",
                 MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
             return;
         }
+        
+        new ClientDialog{DataContext = new ClientViewModel(client)}.ShowDialog();
+    }
 
-        var vm = new ClientViewModel { CurrentClient = client };
-        new ClientDialog{DataContext = vm}.ShowDialog();
+    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.RefreshClients();
     }
 }

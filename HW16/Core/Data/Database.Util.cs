@@ -66,50 +66,75 @@ public static partial class Database
         parameters = visitor.Parameters;
         return visitor.Condition;
     }
+
     
     private class SqlExpressionVisitor : ExpressionVisitor
+{
+    private readonly StringBuilder _condition = new();
+    public List<object> Parameters { get; } = new();
+
+    public string Condition => _condition.ToString();
+
+    protected override Expression VisitBinary(BinaryExpression node)
     {
-        private readonly StringBuilder _condition = new();
-        public List<object> Parameters { get; } = [];
+        _condition.Append('(');
+        Visit(node.Left);
+        _condition.Append($" {GetSqlOperator(node.NodeType)} ");
+        Visit(node.Right);
+        _condition.Append(')');
+        return node;
+    }
 
-        public string Condition => _condition.ToString();
-
-        protected override Expression VisitBinary(BinaryExpression node)
+    protected override Expression VisitMember(MemberExpression node)
+    {
+        if (node.Expression is ConstantExpression)
         {
-            _condition.Append('(');
-            Visit(node.Left);
-            _condition.Append($" {GetSqlOperator(node.NodeType)} ");
-            Visit(node.Right);
-            _condition.Append(')');
-            return node;
+            var value = GetValue(node);
+            _condition.Append($"@param{Parameters.Count}");
+            Parameters.Add(value);
         }
-
-        protected override Expression VisitMember(MemberExpression node)
+        else if (node.Expression is MemberExpression)
+        {
+            var value = GetValue(node);
+            _condition.Append($"@param{Parameters.Count}");
+            Parameters.Add(value);
+        }
+        else
         {
             _condition.Append(node.Member.Name);
-            return node;
         }
-
-        protected override Expression VisitConstant(ConstantExpression node)
-        {
-            _condition.Append($"@param{Parameters.Count}");
-            if (node.Value != null) Parameters.Add(node.Value);
-            return node;
-        }
-
-        private static string GetSqlOperator(ExpressionType type) => type switch
-        {
-            ExpressionType.AndAlso => "AND",
-            ExpressionType.OrElse => "OR",
-            ExpressionType.Equal => "=",
-            ExpressionType.NotEqual => "<>",
-            ExpressionType.GreaterThan => ">",
-            ExpressionType.GreaterThanOrEqual => ">=",
-            ExpressionType.LessThan => "<",
-            ExpressionType.LessThanOrEqual => "<=",
-            _ => throw new NotSupportedException($"Unsupported operator: {type}")
-        };
+        return node;
     }
+
+    protected override Expression VisitConstant(ConstantExpression node)
+    {
+        _condition.Append($"@param{Parameters.Count}");
+        if (node.Value != null) Parameters.Add(node.Value);
+        return node;
+    }
+
+    private static object GetValue(Expression member)
+    {
+        var objectMember = Expression.Convert(member, typeof(object));
+        var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+        var getter = getterLambda.Compile();
+        return getter();
+    }
+
+    private static string GetSqlOperator(ExpressionType type) => type switch
+    {
+        ExpressionType.AndAlso => "AND",
+        ExpressionType.OrElse => "OR",
+        ExpressionType.Equal => "=",
+        ExpressionType.NotEqual => "<>",
+        ExpressionType.GreaterThan => ">",
+        ExpressionType.GreaterThanOrEqual => ">=",
+        ExpressionType.LessThan => "<",
+        ExpressionType.LessThanOrEqual => "<=",
+        _ => throw new NotSupportedException($"Unsupported operator: {type}")
+    };
+}
+
     
     public class SelectOperationResult<T> : OperationResult
     {

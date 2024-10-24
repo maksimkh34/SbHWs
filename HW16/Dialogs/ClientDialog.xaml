@@ -9,8 +9,8 @@
     <Window.DataContext>
         <vms:ClientViewModel></vms:ClientViewModel>
     </Window.DataContext>
-    <Grid>
-        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" 
-                   Text="{Binding CurrentClient.Email}"></TextBlock>
-    </Grid>
+    <StackPanel>
+        <Button Margin="15,5,0,0" Width="140" HorizontalAlignment="Left" Click="RefreshButton_OnClick">Обновить таблицу</Button>
+
+    </StackPanel>
 </Window>
