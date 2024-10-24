@@ -12,7 +12,7 @@ public class RegisterUserViewModel : BaseViewModel
     public string PhoneNumber { get; set; }
     public string Email { get; set; }
 
-    public async Task TryRegister()
+    public async Task<bool> TryRegister()
     {
         if (!Database.IsValidValue(PhoneNumber, typeof(Client).GetProperty(nameof(Client.PhoneNumber))!))
         {
@@ -20,7 +20,7 @@ public class RegisterUserViewModel : BaseViewModel
                 "Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
-            return;
+            return false;
         }
         if (!Database.IsValidValue(Email, typeof(Client).GetProperty(nameof(Client.Email))!))
         {
@@ -28,7 +28,7 @@ public class RegisterUserViewModel : BaseViewModel
                 "Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
-            return;
+            return false;
         }
 
         if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Surname))
@@ -37,7 +37,7 @@ public class RegisterUserViewModel : BaseViewModel
                 "Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
-            return;
+            return false;
         }
 
         var result = await Database.InsertAsync(new Client
@@ -61,5 +61,7 @@ public class RegisterUserViewModel : BaseViewModel
             "OK",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
+
+        return true;
     }
 }

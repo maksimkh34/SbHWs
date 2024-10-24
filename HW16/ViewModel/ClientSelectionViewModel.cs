@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Input;
 using HW16.Core;
 using Database = HW16.Core.Data.Database;
 
@@ -11,6 +12,62 @@ namespace HW16.ViewModel;
 public class ClientSelectionViewModel : BaseViewModel
 {
     private ObservableCollection<Client> Clients { get; set; }
+    public int SelectedClientIndex { get; set; }
+    private List<Client> _selectedClients;
+    public List<Client> SelectedClients
+    {
+        get => _selectedClients;
+        set
+        {
+            _selectedClients = value;
+            OnPropertyChanged();
+        }
+    }
+    
+
+    public ICommand ProcessSelectedCommand { get; }
+
+    private async void ProcessSelected()
+    {
+        switch (MessageBox.Show("Вы точно хотите удалить этих клиентов?", "Подтверждение", 
+                    MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No))
+        {
+            case MessageBoxResult.Yes:
+            case MessageBoxResult.OK:
+                foreach (var client in SelectedClients)
+                {
+                    var result = await Database.DeleteAsync(client);
+                    if (result.Success) continue;
+                    MessageBox.Show("Ошибка удаления клиентов: " + result.Message, "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                    return;
+                }
+
+                var msg = SelectedClients.Count switch
+                {
+                    0 => "Ни одного клиента не было удалено.",
+                    _ when SelectedClients.Count % 10 == 1 && SelectedClients.Count % 100 != 11 => $"Удален {SelectedClients.Count} клиент.",
+                    _ when (SelectedClients.Count % 10 == 2 || SelectedClients.Count % 10 == 3 || SelectedClients.Count % 10 == 4) && !(SelectedClients.Count % 100 >= 11 && SelectedClients.Count % 100 <= 14) => $"Удалено {SelectedClients.Count} клиента.",
+                    _ => $"Удалено {SelectedClients.Count} клиентов."
+                };
+                MessageBox.Show(msg, "ОК",
+                    MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+                SelectedClients.Clear();
+                await RefreshClients();
+                break;
+            case MessageBoxResult.None:
+            case MessageBoxResult.Cancel:
+            case MessageBoxResult.No:
+            default:
+                return;
+        }
+    }
+
+    private bool CanProcessSelected()
+    {
+        return SelectedClients.Count != 0;
+    }
+    
     public ListCollectionView  ClientsView { get; } = null!;
     private string _idFilter = "";
     public string IdFilter
@@ -88,6 +145,7 @@ public class ClientSelectionViewModel : BaseViewModel
     {
         Database.CheckInitializeSync();
         var result = Database.Select<Client>();
+        ProcessSelectedCommand = new RelayCommand(ProcessSelected, CanProcessSelected);
 
         if (!result.Success)
         {
@@ -130,4 +188,18 @@ public class ClientSelectionViewModel : BaseViewModel
 
         return matches;
     }
+}
+
+public class RelayCommand(Action processSelected, Func<bool> canProcessSelected) : ICommand
+{
+    public bool CanExecute(object? parameter)
+    {
+        return canProcessSelected.Invoke();
+    }
+
+    public void Execute(object? parameter)
+    {
+        processSelected.Invoke();
+    }
+    public event EventHandler? CanExecuteChanged;
 }
