@@ -8,7 +8,7 @@ namespace HW16;
 
 public class ClientSelectionViewModel : INotifyPropertyChanged
 {
-    private ObservableCollection<Client> Clients { get; }
+    private ObservableCollection<Client> Clients { get; set; }
     public ListCollectionView  ClientsView { get; } = null!;
     private string _idFilter = "";
     public string IdFilter
@@ -69,8 +69,7 @@ public class ClientSelectionViewModel : INotifyPropertyChanged
             ClientsView.Refresh();
         }
     }
-
-
+    
     private string _emailFilter = "";
     public string EmailFilter
     {
@@ -86,12 +85,11 @@ public class ClientSelectionViewModel : INotifyPropertyChanged
     public ClientSelectionViewModel()
     {
         Database.CheckInitializeSync();
-        var task = Task.Run(() => Database.SelectAsync<Client>());
-        var result = task.GetAwaiter().GetResult();
+        var result = Database.Select<Client>();
 
         if (!result.Success)
         {
-            MessageBox.Show("Database loading failed: " + task.Result.Message,
+            MessageBox.Show("Database loading failed: " + result.Message,
                 "Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
@@ -99,9 +97,14 @@ public class ClientSelectionViewModel : INotifyPropertyChanged
             return;
         }
 
-        Clients = new ObservableCollection<Client>(task.Result.Data);
+        Clients = new ObservableCollection<Client>(result.Data);
         ClientsView = (CollectionViewSource.GetDefaultView(Clients) as ListCollectionView)!;
         ClientsView.Filter = ClientFilter;
+    }
+
+    public void RefreshClients()
+    {
+        Clients = new ObservableCollection<Client>(Database.Select<Client>().Data);
     }
 
     private bool ClientFilter(object item)
@@ -118,8 +121,6 @@ public class ClientSelectionViewModel : INotifyPropertyChanged
 
         return matches;
     }
-
-
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

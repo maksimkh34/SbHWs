@@ -148,8 +148,7 @@ public static partial class Database
             };
         }
     }
-
-
+    
     public static async Task<DeleteOperationResult> DeleteAsync(ICanBeInsertedToDatabase objectToDelete)
     {
         var conn = objectToDelete.GetConnection();
@@ -312,9 +311,7 @@ public static partial class Database
 
     return results;
 }
-
-
-
+    
     public static async Task<InsertOperationResult> InsertAsync(ICanBeInsertedToDatabase objectToInsert)
     {
         var conn = objectToInsert.GetConnection();
@@ -360,4 +357,23 @@ public static partial class Database
         }
     }
 
+    public static SelectOperationResult<TObject> Select<TObject>(Expression<Func<TObject, bool>>? filter = null) where TObject : ICanBeInsertedToDatabase, new()
+    {
+        return Task.Run(() => SelectAsync(filter)).GetAwaiter().GetResult();
+    }
+
+    public static UpdateOperationResult Update(ICanBeInsertedToDatabase objectToUpdate)
+    {
+        return Task.Run(() => UpdateAsync(objectToUpdate)).GetAwaiter().GetResult();
+    }
+    
+    public static DeleteOperationResult Delete(ICanBeInsertedToDatabase objectToDelete)
+    {
+        return Task.Run(() => DeleteAsync(objectToDelete)).GetAwaiter().GetResult();
+    }
+    
+    public static InsertOperationResult Insert(ICanBeInsertedToDatabase objectToInsert)
+    {
+        return Task.Run(() => InsertAsync(objectToInsert)).GetAwaiter().GetResult();
+    }
 }

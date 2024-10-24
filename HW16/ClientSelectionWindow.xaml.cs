@@ -2,9 +2,6 @@
 
 namespace HW16;
 
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class ClientSelectionWindow
 {
     public ClientSelectionWindow()
@@ -20,5 +17,6 @@ public partial class ClientSelectionWindow
     private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
         new RegisterUser().ShowDialog();
+        ((ClientSelectionViewModel)DataContext).RefreshClients();
     }
 }

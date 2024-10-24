@@ -1,8 +1,6 @@
-﻿using System.Windows;
+﻿namespace HW16;
 
-namespace HW16;
-
-public partial class RegisterUser : Window
+public partial class RegisterUser
 {
     public RegisterUser()
     {
