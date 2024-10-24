@@ -2,8 +2,9 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
-namespace HW16;
+namespace HW16.Data;
 
 public static partial class Database
 {
@@ -45,6 +46,13 @@ public static partial class Database
 
     private static bool IsValidValue(object? value, PropertyInfo propertyInfo)
     {
+        if(propertyInfo.Name.Contains("Email")) return value != null && value.ToString()!.Contains('@') && value.ToString()!.Contains('.');
+        if (propertyInfo.Name.Contains("PhoneNumber"))
+        {
+            var number = value?.ToString()!;
+            if (string.IsNullOrEmpty(number)) return false;
+            return MyRegex().IsMatch(number);
+        }
         return true;
     }
     
@@ -99,9 +107,7 @@ public static partial class Database
             _ => throw new NotSupportedException($"Unsupported operator: {type}")
         };
     }
-
-
-
+    
     public class SelectOperationResult<T> : OperationResult
     {
         public List<T> Data { get; set; } = [];
@@ -139,4 +145,7 @@ public static partial class Database
         ProductSales,
         Clients
     }
+
+    [GeneratedRegex(@"^\+\d+$")]
+    private static partial Regex MyRegex();
 }

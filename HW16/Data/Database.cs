@@ -4,7 +4,7 @@ using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq.Expressions;
 
-namespace HW16;
+namespace HW16.Data;
 
 public static partial class Database
 {

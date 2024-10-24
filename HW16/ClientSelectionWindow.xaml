@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         SizeToContent="Height"
         Loaded="MainWindow_OnLoaded"
-        Title="MainWindow">
+        Title="Выбор клиента">
     <Window.DataContext>
         <local:ClientSelectionViewModel></local:ClientSelectionViewModel>
     </Window.DataContext>
