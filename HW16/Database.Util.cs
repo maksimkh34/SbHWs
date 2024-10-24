@@ -1,5 +1,7 @@
 ﻿using System.Data.Common;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 
 namespace HW16;
 
@@ -43,6 +45,60 @@ public static partial class Database
     {
         return true;
     }
+    
+    private static string BuildSqlCondition<TObject>(Expression<Func<TObject, bool>> filter, out List<object> parameters)
+    {
+        var visitor = new SqlExpressionVisitor();
+        visitor.Visit(filter);
+        parameters = visitor.Parameters;
+        return visitor.Condition;
+    }
+    
+    private class SqlExpressionVisitor : ExpressionVisitor
+    {
+        private readonly StringBuilder _condition = new();
+        public List<object> Parameters { get; } = [];
+
+        public string Condition => _condition.ToString();
+
+        protected override Expression VisitBinary(BinaryExpression node)
+        {
+            _condition.Append('(');
+            Visit(node.Left);
+            _condition.Append($" {GetSqlOperator(node.NodeType)} ");
+            Visit(node.Right);
+            _condition.Append(')');
+            return node;
+        }
+
+        protected override Expression VisitMember(MemberExpression node)
+        {
+            _condition.Append(node.Member.Name);
+            return node;
+        }
+
+        protected override Expression VisitConstant(ConstantExpression node)
+        {
+            _condition.Append($"@param{Parameters.Count}");
+            if (node.Value != null) Parameters.Add(node.Value);
+            return node;
+        }
+
+        private static string GetSqlOperator(ExpressionType type) => type switch
+        {
+            ExpressionType.AndAlso => "AND",
+            ExpressionType.OrElse => "OR",
+            ExpressionType.Equal => "=",
+            ExpressionType.NotEqual => "<>",
+            ExpressionType.GreaterThan => ">",
+            ExpressionType.GreaterThanOrEqual => ">=",
+            ExpressionType.LessThan => "<",
+            ExpressionType.LessThanOrEqual => "<=",
+            _ => throw new NotSupportedException($"Unsupported operator: {type}")
+        };
+    }
+
+
 
     public class SelectOperationResult<T> : OperationResult
     {

@@ -219,41 +219,19 @@ public static partial class Database
         .Aggregate("", (current, propertyInfo) => current + propertyInfo.Name + ", ")
         .TrimEnd(',', ' ');
 
-    // Начинаем с базового SQL-запроса
     var sql = $"SELECT {columns} FROM {objectToSelect.Table}";
-    
+
     if (filter != null)
     {
-        // Применяем фильтр к SQL-запросу, если он передан
-        var conditions = string.Empty;
-        var parameterIndex = 0;
-
-        // Список значений для параметров
-        var filterValues = new List<object>();
-
-        // Парсим фильтр и извлекаем значения
-        var binaryExpression = filter.Body as BinaryExpression;
-        if (binaryExpression != null)
+        var condition = BuildSqlCondition(filter, out var parameters);
+        if (!string.IsNullOrEmpty(condition))
         {
-            // Извлекаем левую и правую части фильтра
-            var left = binaryExpression.Left as MemberExpression;
-            var right = binaryExpression.Right as ConstantExpression;
-
-            if (left != null && right != null)
-            {
-                conditions = $"{left.Member.Name} = @param{parameterIndex}";
-                if (right.Value != null) filterValues.Add(right.Value);
-            }
-        }
-
-        if (!string.IsNullOrEmpty(conditions))
-        {
-            sql += $" WHERE {conditions}";
-            foreach (var value in filterValues)
+            sql += $" WHERE {condition}";
+            for (var i = 0; i < parameters.Count; i++)
             {
                 var parameter = command.CreateParameter();
-                parameter.ParameterName = $"@param{parameterIndex++}";
-                parameter.Value = value;
+                parameter.ParameterName = $"@param{i}";
+                parameter.Value = parameters[i];
                 command.Parameters.Add(parameter);
             }
         }
@@ -266,7 +244,7 @@ public static partial class Database
 
     try
     {
-        using var reader = await command.ExecuteReaderAsync();
+        await using var reader = await command.ExecuteReaderAsync();
         if (!reader.HasRows)
         {
             results.Success = false;
@@ -284,7 +262,6 @@ public static partial class Database
                 var value = reader[propertyInfo.Name];
                 if (value == DBNull.Value) continue;
 
-                // Валидация данных
                 if (!IsValidValue(value, propertyInfo))
                 {
                     results.Success = false;
@@ -299,16 +276,20 @@ public static partial class Database
                 propertyInfo.SetValue(obj, convertedValue);
             }
 
-            if (filter == null || filter.Compile().Invoke(obj))
-            {
-                results.Data.Add(obj);
-            }
+            results.Data.Add(obj);
         }
 
         results.Success = true;
         results.Message = null;
         results.ErrorCode = null;
-    }catch (Exception ex)
+    }
+    catch (SqlException ex) when (ex.Number == -2)
+    {
+        results.Success = false;
+        results.Message = $"Select failed: {ex.Message}";
+        results.ErrorCode = SelectErrorCode.TimeoutError;
+    }
+    catch (Exception ex)
     {
         results.Success = false;
         results.Message = $"Select failed: {ex.Message}";
@@ -316,7 +297,9 @@ public static partial class Database
     }
 
     return results;
-    }
+}
+
+
 
     public static async Task<InsertOperationResult> InsertAsync(ICanBeInsertedToDatabase objectToInsert)
     {
