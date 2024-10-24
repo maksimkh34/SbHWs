@@ -1,0 +1,62 @@
+﻿<Window x:Class="HW16.ClientSelectionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:HW16"
+        mc:Ignorable="d"
+        SizeToContent="Height"
+        Loaded="MainWindow_OnLoaded"
+        Title="MainWindow">
+    <Window.DataContext>
+        <local:ClientSelectionViewModel></local:ClientSelectionViewModel>
+    </Window.DataContext>
+    
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type local:Client}">
+            <TextBlock Text="{Binding Surname}"/>
+        </DataTemplate>
+    </Window.Resources>
+
+
+    <StackPanel Orientation="Vertical">
+        <TextBlock Margin="5,5,0,3">Поиск по параметрам</TextBlock>
+        
+        <StackPanel Orientation="Horizontal" Margin="6,0,0,0">
+            <TextBox Width="{Binding ElementName=IdColumn, Path=ActualWidth}" 
+                     Text="{Binding IdFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Width="{Binding ElementName=SurnameColumn, Path=ActualWidth}" 
+                     Text="{Binding SurnameFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Width="{Binding ElementName=NameColumn, Path=ActualWidth}" 
+                     Text="{Binding NameFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Width="{Binding ElementName=PatronymicColumn, Path=ActualWidth}" 
+                     Text="{Binding PatronymicFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Width="{Binding ElementName=PhoneNumberColumn, Path=ActualWidth}" 
+                     Text="{Binding PhoneNumberFilter, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Width="{Binding ElementName=EmailColumn, Path=ActualWidth}" 
+                     Text="{Binding EmailFilter, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+        
+        <DataGrid ItemsSource="{Binding ClientsView}" 
+                  CanUserAddRows="False" CanUserDeleteRows="False" 
+                  CanUserReorderColumns="False" AutoGenerateColumns="False">
+    
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="IdColumn" Header="ID" Binding="{Binding Id}" Width="100*" />
+                <DataGridTextColumn x:Name="SurnameColumn" Header="Фамилия" Binding="{Binding Surname}" Width="150*" />
+                <DataGridTextColumn x:Name="NameColumn" Header="Имя" Binding="{Binding Name}" Width="150*" />
+                <DataGridTextColumn x:Name="PatronymicColumn" Header="Отчество" Binding="{Binding Patronymic}" Width="150*" />
+                <DataGridTextColumn x:Name="PhoneNumberColumn" Header="Телефон" Binding="{Binding PhoneNumber}" Width="150*" />
+                <DataGridTextColumn x:Name="EmailColumn" Header="Email" Binding="{Binding Email}" Width="200*" />
+            </DataGrid.Columns>
+
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="HorizontalContentAlignment" Value="Center" />
+                </Style>
+            </DataGrid.Resources>
+        </DataGrid>
+        <Button Margin="5,5,5,0">Выбрать клиента</Button>
+        <Button Margin="5,5,5,5" Click="ButtonBase_OnClick">Зарегистрировать клиента</Button>
+    </StackPanel>
+</Window>

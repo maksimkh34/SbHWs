@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System.Data;
+using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq.Expressions;
@@ -7,11 +8,24 @@ namespace HW16;
 
 public static partial class Database
 {
-    public static SqlConnection LocalConnection { get; private set; } = null!;
-    public static OleDbConnection OleDbConnection { get; private set; } = null!;
+    public static SqlConnection LocalConnection { get; private set; } = new();
+    public static OleDbConnection OleDbConnection { get; private set; } = new();
+
+    private static bool Loaded => LocalConnection.State == ConnectionState.Open && 
+                                  OleDbConnection.State == ConnectionState.Open;
+
+    public static void CheckInitializeSync()
+    {
+        if (Loaded) return;
+        var localResult = ConnectLocal();
+        LocalConnection = localResult.Connection;
+        var accessResult = ConnectAccess();
+        OleDbConnection = accessResult.Connection;
+    }
 
     public static async Task Initialize()
     {
+        if (Loaded) return;
         var localConTask = Task.Factory.StartNew(() =>
         {
             var localResult = ConnectLocal();
@@ -115,7 +129,7 @@ public static partial class Database
                 }
             };
         }
-        catch (System.Data.DBConcurrencyException)
+        catch (DBConcurrencyException)
         {
             return new UpdateOperationResult
             {
@@ -187,7 +201,7 @@ public static partial class Database
                 _ => new DeleteOperationResult { Success = true, Message = null, ErrorCode = null, MultipleRowsAffected = true}
             };
         }
-        catch (System.Data.DBConcurrencyException)
+        catch (DBConcurrencyException)
         {
             return new DeleteOperationResult
             {

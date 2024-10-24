@@ -5,9 +5,9 @@ namespace HW16;
 /// <summary>
 /// Interaction logic for MainWindow.xaml
 /// </summary>
-public partial class MainWindow
+public partial class ClientSelectionWindow
 {
-    public MainWindow()
+    public ClientSelectionWindow()
     {
         InitializeComponent();
     }
@@ -15,7 +15,10 @@ public partial class MainWindow
     private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
     {
         await Database.Initialize();
-        
     }
-    
+
+    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    {
+        new RegisterUser().ShowDialog();
+    }
 }
