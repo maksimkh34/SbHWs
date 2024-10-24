@@ -1,5 +1,6 @@
 ﻿using System.Windows;
-using HW16.Data;
+using HW16.ViewModel;
+using Database = HW16.Core.Data.Database;
 
 namespace HW16;
 
@@ -15,9 +16,9 @@ public partial class ClientSelectionWindow
         await Database.Initialize();
     }
 
-    private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
     {
         new RegisterUser().ShowDialog();
-        ((ClientSelectionViewModel)DataContext).RefreshClients();
+        await ((ClientSelectionViewModel)DataContext).RefreshClients();
     }
 }

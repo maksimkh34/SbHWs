@@ -3,11 +3,12 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Data;
-using HW16.Data;
+using HW16.Core;
+using Database = HW16.Core.Data.Database;
 
-namespace HW16;
+namespace HW16.ViewModel;
 
-public class ClientSelectionViewModel : INotifyPropertyChanged
+public class ClientSelectionViewModel : BaseViewModel
 {
     private ObservableCollection<Client> Clients { get; set; }
     public ListCollectionView  ClientsView { get; } = null!;
@@ -103,10 +104,17 @@ public class ClientSelectionViewModel : INotifyPropertyChanged
         ClientsView.Filter = ClientFilter;
     }
 
-    public void RefreshClients()
+    public async Task RefreshClients()
     {
-        Clients = new ObservableCollection<Client>(Database.Select<Client>().Data);
+        var newClients = (await Database.SelectAsync<Client>()).Data;
+        Clients.Clear();
+        foreach (var client in newClients)
+        {
+            Clients.Add(client);
+        }
+        ClientsView.Refresh();
     }
+
 
     private bool ClientFilter(object item)
     {
@@ -121,12 +129,5 @@ public class ClientSelectionViewModel : INotifyPropertyChanged
         matches &= string.IsNullOrEmpty(EmailFilter) || client.Email.Contains(EmailFilter, StringComparison.OrdinalIgnoreCase);
 
         return matches;
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

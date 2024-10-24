@@ -1,9 +1,9 @@
 ﻿using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
-using HW16.Data;
+using HW16.Core.Data;
 
-namespace HW16;
+namespace HW16.Core;
 
 public static class Util
 {
@@ -37,7 +37,8 @@ public class Client : ICanBeInsertedToDatabase
     public string Patronymic { get; set; }
     public string PhoneNumber { get; set; }
     public string Email { get; set; }
-    public Database.Tables Table { get; set; } = Database.Tables.Clients;
+    public Database.Tables Table => Database.Tables.Clients;
+
     public DbConnection GetConnection()
     {
         return Database.LocalConnection;
@@ -55,7 +56,7 @@ public class ProductSaleEntry : ICanBeInsertedToDatabase
     public string Email { get; set; }
     public int ProductId { get; set; }
     public string ProductName { get; set; }
-    public Database.Tables Table { get; set; } = Database.Tables.ProductSales;
+    public Database.Tables Table => Database.Tables.ProductSales;
     public DbConnection GetConnection()
     {
         return Database.OleDbConnection;
@@ -69,7 +70,7 @@ public class ProductSaleEntry : ICanBeInsertedToDatabase
 
 public interface ICanBeInsertedToDatabase
 {
-    public Database.Tables Table { get; set; }
+    public Database.Tables Table { get; }
     DbConnection GetConnection();
     Type GetCommandType();
 

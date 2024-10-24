@@ -4,7 +4,7 @@ using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq.Expressions;
 
-namespace HW16.Data;
+namespace HW16.Core.Data;
 
 public static partial class Database
 {
@@ -221,96 +221,96 @@ public static partial class Database
     }
     
     public static async Task<SelectOperationResult<TObject>> SelectAsync<TObject>(Expression<Func<TObject, bool>>? filter = null) where TObject : ICanBeInsertedToDatabase, new()
-{
-    var objectToSelect = new TObject();
-    var conn = objectToSelect.GetConnection();
-    var commandType = objectToSelect.GetCommandType();
-    var command = (DbCommand)Activator.CreateInstance(commandType)!;
-
-    var columns = objectToSelect.GetType().GetProperties()
-        .Where(p => p.Name != "Table")
-        .Aggregate("", (current, propertyInfo) => current + propertyInfo.Name + ", ")
-        .TrimEnd(',', ' ');
-
-    var sql = $"SELECT {columns} FROM {objectToSelect.Table}";
-
-    if (filter != null)
     {
-        var condition = BuildSqlCondition(filter, out var parameters);
-        if (!string.IsNullOrEmpty(condition))
+        var objectToSelect = new TObject();
+        var conn = objectToSelect.GetConnection();
+        var commandType = objectToSelect.GetCommandType();
+        var command = (DbCommand)Activator.CreateInstance(commandType)!;
+
+        var columns = objectToSelect.GetType().GetProperties()
+            .Where(p => p.Name != "Table")
+            .Aggregate("", (current, propertyInfo) => current + propertyInfo.Name + ", ")
+            .TrimEnd(',', ' ');
+
+        var sql = $"SELECT {columns} FROM {objectToSelect.Table}";
+
+        if (filter != null)
         {
-            sql += $" WHERE {condition}";
-            for (var i = 0; i < parameters.Count; i++)
+            var condition = BuildSqlCondition(filter, out var parameters);
+            if (!string.IsNullOrEmpty(condition))
             {
-                var parameter = command.CreateParameter();
-                parameter.ParameterName = $"@param{i}";
-                parameter.Value = parameters[i];
-                command.Parameters.Add(parameter);
+                sql += $" WHERE {condition}";
+                for (var i = 0; i < parameters.Count; i++)
+                {
+                    var parameter = command.CreateParameter();
+                    parameter.ParameterName = $"@param{i}";
+                    parameter.Value = parameters[i];
+                    command.Parameters.Add(parameter);
+                }
             }
         }
-    }
 
-    command.CommandText = sql;
-    command.Connection = conn;
+        command.CommandText = sql;
+        command.Connection = conn;
 
-    var results = new SelectOperationResult<TObject>();
+        var results = new SelectOperationResult<TObject>();
 
-    try
-    {
-        await using var reader = await command.ExecuteReaderAsync();
-        if (!reader.HasRows)
+        try
         {
-            results.Success = false;
-            results.Message = "No records found.";
-            results.ErrorCode = SelectErrorCode.RecordNotFound;
-            return results;
-        }
-
-        while (await reader.ReadAsync())
-        {
-            var obj = new TObject();
-            foreach (var propertyInfo in obj.GetType().GetProperties())
+            await using var reader = await command.ExecuteReaderAsync();
+            if (!reader.HasRows)
             {
-                if (propertyInfo.Name == "Table") continue;
-                var value = reader[propertyInfo.Name];
-                if (value == DBNull.Value) continue;
+                results.Success = false;
+                results.Message = "No records found.";
+                results.ErrorCode = SelectErrorCode.RecordNotFound;
+                return results;
+            }
 
-                if (!IsValidValue(value, propertyInfo))
+            while (await reader.ReadAsync())
+            {
+                var obj = new TObject();
+                foreach (var propertyInfo in obj.GetType().GetProperties())
                 {
-                    results.Success = false;
-                    results.Message = $"Invalid value for {propertyInfo.Name}";
-                    results.ErrorCode = SelectErrorCode.ValidationError;
-                    return results;
+                    if (propertyInfo.Name == "Table") continue;
+                    var value = reader[propertyInfo.Name];
+                    if (value == DBNull.Value) continue;
+
+                    if (!IsValidValue(value, propertyInfo))
+                    {
+                        results.Success = false;
+                        results.Message = $"Invalid value for {propertyInfo.Name}";
+                        results.ErrorCode = SelectErrorCode.ValidationError;
+                        return results;
+                    }
+
+                    var propertyType = propertyInfo.PropertyType;
+                    var convertedValue = Convert.ChangeType(value, propertyType);
+                    if (convertedValue is string stringValue) convertedValue = stringValue.TrimEnd();
+                    propertyInfo.SetValue(obj, convertedValue);
                 }
 
-                var propertyType = propertyInfo.PropertyType;
-                var convertedValue = Convert.ChangeType(value, propertyType);
-                if (convertedValue is string stringValue) convertedValue = stringValue.TrimEnd();
-                propertyInfo.SetValue(obj, convertedValue);
+                results.Data.Add(obj);
             }
 
-            results.Data.Add(obj);
+            results.Success = true;
+            results.Message = null;
+            results.ErrorCode = null;
+        }
+        catch (SqlException ex) when (ex.Number == -2)
+        {
+            results.Success = false;
+            results.Message = $"Select failed: {ex.Message}";
+            results.ErrorCode = SelectErrorCode.TimeoutError;
+        }
+        catch (Exception ex)
+        {
+            results.Success = false;
+            results.Message = $"Select failed: {ex.Message}";
+            results.ErrorCode = SelectErrorCode.DatabaseError;
         }
 
-        results.Success = true;
-        results.Message = null;
-        results.ErrorCode = null;
+        return results;
     }
-    catch (SqlException ex) when (ex.Number == -2)
-    {
-        results.Success = false;
-        results.Message = $"Select failed: {ex.Message}";
-        results.ErrorCode = SelectErrorCode.TimeoutError;
-    }
-    catch (Exception ex)
-    {
-        results.Success = false;
-        results.Message = $"Select failed: {ex.Message}";
-        results.ErrorCode = SelectErrorCode.DatabaseError;
-    }
-
-    return results;
-}
     
     public static async Task<InsertOperationResult> InsertAsync(ICanBeInsertedToDatabase objectToInsert)
     {

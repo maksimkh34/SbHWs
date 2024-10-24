@@ -4,10 +4,12 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace HW16.Data;
+namespace HW16.Core.Data;
 
 public static partial class Database
 {
+    public const bool ValidateValues = false;
+
     public abstract class OperationResult
     {
         public bool Success { get; set; }
@@ -44,14 +46,15 @@ public static partial class Database
         public bool MultipleRowsAffected { get; set; }
     }
 
-    private static bool IsValidValue(object? value, PropertyInfo propertyInfo)
+    public static bool IsValidValue(object? value, PropertyInfo propertyInfo)
     {
-        if(propertyInfo.Name.Contains("Email")) return value != null && value.ToString()!.Contains('@') && value.ToString()!.Contains('.');
+        if (!ValidateValues) return true;
+        var str = value?.ToString()!.TrimEnd()!;
+        if(propertyInfo.Name.Contains("Email")) return value != null && str.Contains('@') && str.Contains('.');
         if (propertyInfo.Name.Contains("PhoneNumber"))
         {
-            var number = value?.ToString()!;
-            if (string.IsNullOrEmpty(number)) return false;
-            return MyRegex().IsMatch(number);
+            if (string.IsNullOrEmpty(str)) return false;
+            return MyRegex().IsMatch(str);
         }
         return true;
     }

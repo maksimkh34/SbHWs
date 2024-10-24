@@ -4,16 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HW16"
+        xmlns:viewModel="clr-namespace:HW16.ViewModel"
+        xmlns:core="clr-namespace:HW16.Core"
         mc:Ignorable="d"
         SizeToContent="Height"
         Loaded="MainWindow_OnLoaded"
         Title="Выбор клиента">
     <Window.DataContext>
-        <local:ClientSelectionViewModel></local:ClientSelectionViewModel>
+        <viewModel:ClientSelectionViewModel></viewModel:ClientSelectionViewModel>
     </Window.DataContext>
     
     <Window.Resources>
-        <DataTemplate DataType="{x:Type local:Client}">
+        <DataTemplate DataType="{x:Type core:Client}">
             <TextBlock Text="{Binding Surname}"/>
         </DataTemplate>
     </Window.Resources>
@@ -49,12 +51,6 @@
                 <DataGridTextColumn x:Name="PhoneNumberColumn" Header="Телефон" Binding="{Binding PhoneNumber}" Width="150*" />
                 <DataGridTextColumn x:Name="EmailColumn" Header="Email" Binding="{Binding Email}" Width="200*" />
             </DataGrid.Columns>
-
-            <DataGrid.Resources>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="HorizontalContentAlignment" Value="Center" />
-                </Style>
-            </DataGrid.Resources>
         </DataGrid>
         <Button Margin="5,5,5,0">Выбрать клиента</Button>
         <Button Margin="5,5,5,5" Click="ButtonBase_OnClick">Зарегистрировать клиента</Button>
