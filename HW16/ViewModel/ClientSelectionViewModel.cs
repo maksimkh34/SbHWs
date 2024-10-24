@@ -23,7 +23,11 @@ public class ClientSelectionViewModel : BaseViewModel
             OnPropertyChanged();
         }
     }
-    
+
+    public Client? GetSelectedClient()
+    {
+        return SelectedClients.Count != 1 ? null : SelectedClients.First();
+    }
 
     public ICommand ProcessSelectedCommand { get; }
 

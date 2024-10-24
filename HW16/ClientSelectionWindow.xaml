@@ -59,7 +59,7 @@
                 <DataGridTextColumn x:Name="EmailColumn" Header="Email" Binding="{Binding Email}" Width="200*" />
             </DataGrid.Columns>
         </DataGrid>
-        <Button Margin="5,5,5,0">Выбрать клиента</Button>
-        <Button Margin="5,5,5,5" Click="ButtonBase_OnClick">Зарегистрировать клиента</Button>
+        <Button Margin="5,5,5,0" Click="SelectClient_OnClick">Выбрать клиента</Button>
+        <Button Margin="5,5,5,5" Click="SelectClient_OnClick">Зарегистрировать клиента</Button>
     </StackPanel>
 </Window>

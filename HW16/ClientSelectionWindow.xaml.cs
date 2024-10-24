@@ -18,7 +18,7 @@ public partial class ClientSelectionWindow
         await Database.Initialize();
     }
 
-    private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+    private async void RegisterButton_OnClick(object sender, RoutedEventArgs e)
     {
         new RegisterUser().ShowDialog();
         await ((ClientSelectionViewModel)DataContext).RefreshClients();
@@ -27,5 +27,19 @@ public partial class ClientSelectionWindow
     private void Selector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         ((ClientSelectionViewModel)DataContext).SelectedClients = ClientsDataGrid.SelectedItems.Cast<Client>().ToList();
+    }
+
+    private void SelectClient_OnClick(object sender, RoutedEventArgs e)
+    {
+        var client = ((ClientSelectionViewModel)DataContext).GetSelectedClient();
+        if (client == null)
+        {
+            MessageBox.Show("Выберите ровно одного клиента. ", "Предупреждение",
+                MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
+            return;
+        }
+
+        var vm = new ClientViewModel { CurrentClient = client };
+        new ClientDialog{DataContext = vm}.ShowDialog();
     }
 }
