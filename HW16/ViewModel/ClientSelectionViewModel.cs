@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using HW16.Core;
@@ -22,6 +21,61 @@ public class ClientSelectionViewModel : BaseViewModel
             _selectedClients = value;
             OnPropertyChanged();
         }
+    }
+
+    public async Task<bool?> CellEdited(DataGridCellEditEndingEventArgs e)
+    {
+        if (e.EditingElement is not TextBox textBox) return null;
+        var newValue = textBox.Text;
+
+        if (e.Row.Item is not Client editedClient) return null;
+        if(e.Column.Header is not string columnName) return null;
+        var oldValue = GetOldValue(editedClient, columnName);
+                
+        var propertyInfo = typeof(Client).GetProperty(ColumnNameToPropertyName(columnName));
+        if (propertyInfo == null) return null;
+        if (Database.IsValidValue(newValue, propertyInfo))
+        {
+            propertyInfo.SetValue(editedClient, Convert.ChangeType(newValue, propertyInfo.PropertyType));
+            await Database.UpdateAsync(editedClient);
+            await RefreshClients();
+            return true;
+        }
+        else
+        {
+            textBox.Text = oldValue;
+            return false;
+        }
+
+        return null;
+    }
+
+    private static string ColumnNameToPropertyName(string columnName)
+    {
+        return (columnName switch
+        {
+            "ID" => nameof(Client.Id),
+            "Фамилия" => nameof(Client.Surname),
+            "Имя" => nameof(Client.Name),
+            "Отчество" => nameof(Client.Patronymic),
+            "Телефон" => nameof(Client.PhoneNumber),
+            "Email" => nameof(Client.Email),
+            _ => null
+        })!;
+    }
+    
+    private static string GetOldValue(Client client, string columnName)
+    {
+        return (columnName switch
+        {
+            "ID" => client.Id.ToString(),
+            "Фамилия" => client.Surname,
+            "Имя" => client.Name,
+            "Отчество" => client.Patronymic,
+            "Телефон" => client.PhoneNumber,
+            "Email" => client.Email,
+            _ => null
+        })!;
     }
 
     public Client? GetSelectedClient()
@@ -147,6 +201,7 @@ public class ClientSelectionViewModel : BaseViewModel
 
     public ClientSelectionViewModel()
     {
+        _selectedClients = [];
         Database.CheckInitializeSync();
         var result = Database.Select<Client>();
         ProcessSelectedCommand = new RelayCommand(ProcessSelected, CanProcessSelected);

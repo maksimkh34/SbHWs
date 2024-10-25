@@ -8,7 +8,7 @@ namespace HW16.Core.Data;
 
 public static partial class Database
 {
-    public const bool ValidateValues = false;
+    private const bool ValidateValues = true;
 
     public abstract class OperationResult
     {
@@ -53,8 +53,13 @@ public static partial class Database
         if(propertyInfo.Name.Contains("Email")) return value != null && str.Contains('@') && str.Contains('.');
         if (propertyInfo.Name.Contains("PhoneNumber"))
         {
-            if (string.IsNullOrEmpty(str)) return false;
-            return MyRegex().IsMatch(str);
+            return !string.IsNullOrEmpty(str) && EmailRegex().IsMatch(str);
+        }
+        // ReSharper disable once InvertIf
+        if (propertyInfo.Name.Contains("Surname") || propertyInfo.Name.Contains("Name"))
+        {
+            var regex = NameRegex();
+            return regex.IsMatch(str);
         }
         return true;
     }
@@ -175,5 +180,7 @@ public static partial class Database
     }
 
     [GeneratedRegex(@"^\+\d+$")]
-    private static partial Regex MyRegex();
+    private static partial Regex EmailRegex();
+    [GeneratedRegex(@"^[a-zA-Zа-яА-ЯёЁ]+$")]
+    private static partial Regex NameRegex();
 }

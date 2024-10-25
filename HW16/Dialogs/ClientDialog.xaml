@@ -11,6 +11,23 @@
     </Window.DataContext>
     <StackPanel>
         <Button Margin="15,5,0,0" Width="140" HorizontalAlignment="Left" Click="RefreshButton_OnClick">Обновить таблицу</Button>
-
+        <DataGrid ItemsSource="{Binding Sales}" 
+                  CanUserAddRows="False" CanUserDeleteRows="False" 
+                  x:Name="SalesDataGrid"
+                  IsReadOnly="True"
+                  CanUserReorderColumns="False" AutoGenerateColumns="False">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Удалить" Command="{Binding ProcessSelectedCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+            
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="IdColumn" Header="ID записи" Binding="{Binding Id}" Width="50*" />
+                <DataGridTextColumn x:Name="PatronymicColumn" Header="Email" Binding="{Binding Email}" Width="150*" />
+                <DataGridTextColumn x:Name="SurnameColumn" Header="ID Продукта" Binding="{Binding ProductId}" Width="50*" />
+                <DataGridTextColumn x:Name="NameColumn" Header="Наименование продукта" Binding="{Binding ProductName}" Width="200*" />
+            </DataGrid.Columns>
+        </DataGrid>
     </StackPanel>
 </Window>

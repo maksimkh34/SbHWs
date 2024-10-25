@@ -43,7 +43,7 @@
                   SelectedIndex="{Binding SelectedClientIndex}"
                   CanUserAddRows="False" CanUserDeleteRows="False" 
                   x:Name="ClientsDataGrid"
-                  IsReadOnly="True"
+                  CellEditEnding="ClientsDataGrid_OnCellEditEnding"
                   SelectionChanged="Selector_OnSelectionChanged"
                   CanUserReorderColumns="False" AutoGenerateColumns="False">
             <DataGrid.ContextMenu>
@@ -53,7 +53,7 @@
             </DataGrid.ContextMenu>
             
             <DataGrid.Columns>
-                <DataGridTextColumn x:Name="IdColumn" Header="ID" Binding="{Binding Id}" Width="100*" />
+                <DataGridTextColumn x:Name="IdColumn" Header="ID" Binding="{Binding Id}" Width="100*" IsReadOnly="True"/>
                 <DataGridTextColumn x:Name="SurnameColumn" Header="Фамилия" Binding="{Binding Surname}" Width="150*" />
                 <DataGridTextColumn x:Name="NameColumn" Header="Имя" Binding="{Binding Name}" Width="150*" />
                 <DataGridTextColumn x:Name="PatronymicColumn" Header="Отчество" Binding="{Binding Patronymic}" Width="150*" />

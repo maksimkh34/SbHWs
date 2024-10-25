@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Input;
 using HW16.Core;
 using HW16.Core.Data;
 
@@ -20,6 +21,24 @@ public class ClientViewModel : BaseViewModel
     public ClientViewModel(Client client)
     {
         CurrentClient = client;
+        ProcessSelectedCommand = new RelayCommand(ProcessSelected, CanProcessSelected);
+        RefreshSalesTable();
+    }
+    
+    public ICommand ProcessSelectedCommand { get; }
+
+    private async void ProcessSelected()
+    {
+        
+    }
+
+    private bool CanProcessSelected()
+    {
+        return true;
+    }
+
+    public void RefreshSalesTable()
+    {
         var result = Database.Select<ProductSaleEntry>(entry => entry.Email == CurrentClient.Email);
         if (result.ErrorCode == Database.SelectErrorCode.RecordNotFound)
         {
@@ -35,10 +54,5 @@ public class ClientViewModel : BaseViewModel
             Sales = [];
         }
         Sales = new ObservableCollection<ProductSaleEntry>(result.Data);
-    }
-
-    public void RefreshSalesTable()
-    {
-        
     }
 }

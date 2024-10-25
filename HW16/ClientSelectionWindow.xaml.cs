@@ -52,4 +52,18 @@ public partial class ClientSelectionWindow
     {
         await ViewModel.RefreshClients();
     }
+
+    private async void ClientsDataGrid_OnCellEditEnding(object? sender, DataGridCellEditEndingEventArgs e)
+    {
+        var result = await ViewModel.CellEdited(e);
+        switch (result)
+        {
+            case null:
+                return;
+            case false:
+                MessageBox.Show("Ошибка изменения данных", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                break;
+        }
+    }
 }
