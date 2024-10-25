@@ -10,15 +10,16 @@
         <vms:ClientViewModel></vms:ClientViewModel>
     </Window.DataContext>
     <StackPanel>
-        <Button Margin="15,5,0,0" Width="140" HorizontalAlignment="Left" Click="RefreshButton_OnClick">Обновить таблицу</Button>
+        <Button Margin="15,5,0,5" Width="140" HorizontalAlignment="Left" Click="RefreshButton_OnClick">Обновить таблицу</Button>
         <DataGrid ItemsSource="{Binding Sales}" 
+                  SelectionChanged="SalesDataGrid_OnSelectionChanged"
                   CanUserAddRows="False" CanUserDeleteRows="False" 
                   x:Name="SalesDataGrid"
                   IsReadOnly="True"
                   CanUserReorderColumns="False" AutoGenerateColumns="False">
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Удалить" Command="{Binding ProcessSelectedCommand}" />
+                    <MenuItem Header="Удалить" Command="{Binding DeleteSelectedCommand}" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
             
