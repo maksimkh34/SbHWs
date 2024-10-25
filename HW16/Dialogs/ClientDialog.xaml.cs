@@ -30,4 +30,19 @@ public partial class ClientDialog
         ViewModel.SelectedSales = new ObservableCollection<ProductSaleEntry>(
             SalesDataGrid.SelectedItems.Cast<ProductSaleEntry>());
     }
+
+
+    private async void SalesDataGrid_OnCellEditEnding(object? sender, DataGridCellEditEndingEventArgs e)
+    {
+        var result = await ViewModel.CellEdited(e);
+        switch (result)
+        {
+            case null:
+                return;
+            case false:
+                MessageBox.Show("Ошибка изменения данных", "Ошибка",
+                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                break;
+        }
+    }
 }

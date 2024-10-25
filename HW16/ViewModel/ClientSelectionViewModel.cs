@@ -37,17 +37,15 @@ public class ClientSelectionViewModel : BaseViewModel
         if (Database.IsValidValue(newValue, propertyInfo))
         {
             propertyInfo.SetValue(editedClient, Convert.ChangeType(newValue, propertyInfo.PropertyType));
-            await Database.UpdateAsync(editedClient);
+            var updateResult = await Database.UpdateAsync(editedClient);
+            if(!updateResult) MessageBox.Show("Ошибка обновления данных: " + updateResult.Message, "Ошибка",
+                MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
             await RefreshClients();
             return true;
         }
-        else
-        {
-            textBox.Text = oldValue;
-            return false;
-        }
 
-        return null;
+        textBox.Text = oldValue;
+        return false;
     }
 
     private static string ColumnNameToPropertyName(string columnName)

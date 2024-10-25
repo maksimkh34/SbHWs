@@ -3,6 +3,8 @@ using System.Data.Common;
 using System.Data.OleDb;
 using System.Data.SqlClient;
 using System.Linq.Expressions;
+using System.Text;
+using System.Windows;
 
 namespace HW16.Core.Data;
 
@@ -72,83 +74,111 @@ public static partial class Database
         return new ConnectionInfo<SqlConnection>(localConnection);
     }
 
-    public static async Task<UpdateOperationResult> UpdateAsync(ICanBeInsertedToDatabase objectToUpdate)
+public static async Task<UpdateOperationResult> UpdateAsync(ICanBeInsertedToDatabase objectToUpdate)
+{
+    var conn = objectToUpdate.GetConnection();
+    if (conn.State != ConnectionState.Open)
     {
-        var conn = objectToUpdate.GetConnection();
-        var commandType = objectToUpdate.GetCommandType();
-        var command = (DbCommand)Activator.CreateInstance(commandType)!;
+        await conn.OpenAsync();
+    }
 
-        var columns = objectToUpdate.GetType().GetProperties()
-            .Where(p => p.Name != "Id" && p.Name != "Table")
-            .Select((propertyInfo, index) => $"{propertyInfo.Name} = @param{index}")
-            .Aggregate("", (current, param) => current + param + ", ")
-            .TrimEnd(',', ' ');
+    var commandType = objectToUpdate.GetCommandType();
+    var command = (DbCommand)Activator.CreateInstance(commandType)!;
+    var isOleDb = command is OleDbCommand;
 
-        var sql = $"UPDATE {objectToUpdate.Table} SET {columns} WHERE Id = @Id;";
-        command.CommandText = sql;
-        command.Connection = conn;
+    var columns = objectToUpdate.GetType().GetProperties()
+        .Where(p => p.Name != "Id" && p.Name != "Table")
+        .Select((propertyInfo, index) => $"{propertyInfo.Name} = {(isOleDb ? "?" : $"@param{index}")}")
+        .Aggregate("", (current, param) => current + param + ", ")
+        .TrimEnd(',', ' ');
 
-        var parameterIndex = 0;
-        foreach (var propertyInfo in objectToUpdate.GetType().GetProperties())
-        {
-            if (propertyInfo.Name == "Table") continue;
-            var value = propertyInfo.GetValue(objectToUpdate);
-            if (propertyInfo.Name != "Id" && !IsValidValue(value, propertyInfo))
-            {
-                return new UpdateOperationResult
-                {
-                    Success = false,
-                    Message = $"Invalid value for {propertyInfo.Name}",
-                    ErrorCode = UpdateErrorCode.ValidationError
-                };
-            }
-            var parameter = command.CreateParameter();
-            parameter.ParameterName = propertyInfo.Name == "Id" ? "@Id" : $"@param{parameterIndex++}";
-            parameter.Value = value ?? DBNull.Value;
-            command.Parameters.Add(parameter);
-        }
+    var sql = $"UPDATE {objectToUpdate.Table} SET {columns} WHERE Id = {(isOleDb ? "?" : "@Id")};";
+    command.CommandText = sql;
+    command.Connection = conn;
 
-        try
-        {
-            var rowsAffected = await command.ExecuteNonQueryAsync();
-            return rowsAffected switch
-            {
-                0 => new UpdateOperationResult
-                {
-                    Success = false,
-                    Message = "Record not found.",
-                    ErrorCode = UpdateErrorCode.RecordNotFound
-                },
-                1 => new UpdateOperationResult { Success = true, Message = null, ErrorCode = null },
-                _ => new UpdateOperationResult
-                {
-                    Success = true,
-                    Message = null,
-                    ErrorCode = null,
-                    MultipleRowsAffected = true
-                }
-            };
-        }
-        catch (DBConcurrencyException)
+    var parameterIndex = 0;
+    foreach (var propertyInfo in objectToUpdate.GetType().GetProperties())
+    {
+        if (propertyInfo.Name == "Table" || propertyInfo.Name.Equals("id", StringComparison.CurrentCultureIgnoreCase)) 
+            continue;
+        var value = propertyInfo.GetValue(objectToUpdate);
+
+        if (propertyInfo.Name != "Id" && !IsValidValue(value, propertyInfo))
         {
             return new UpdateOperationResult
             {
                 Success = false,
-                Message = "Concurrency violation.",
-                ErrorCode = UpdateErrorCode.ConcurrencyViolation
+                Message = $"Invalid value for {propertyInfo.Name}",
+                ErrorCode = UpdateErrorCode.ValidationError
             };
         }
-        catch (Exception ex)
-        {
-            return new UpdateOperationResult
-            {
-                Success = false,
-                Message = $"Update failed: {ex.Message}",
-                ErrorCode = UpdateErrorCode.DatabaseError
-            };
-        }
+
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = isOleDb ? "?" : $"@param{parameterIndex++}";
+        parameter.Value = value ?? DBNull.Value;
+        command.Parameters.Add(parameter);
     }
     
+    if (!isOleDb)
+    {
+        var idValue = objectToUpdate.GetType().GetProperty("Id")?.GetValue(objectToUpdate) ?? DBNull.Value;
+        var idParameter = command.CreateParameter();
+        idParameter.ParameterName = "@Id";
+        idParameter.Value = idValue;
+        command.Parameters.Add(idParameter);
+    }
+    else
+    {
+        var idValue = objectToUpdate.GetType().GetProperty("Id")?.GetValue(objectToUpdate) ?? DBNull.Value;
+        var idParameter = command.CreateParameter();
+        idParameter.Value = idValue;
+        command.Parameters.Add(idParameter);
+    }
+    
+
+    try
+    {
+        var rowsAffected = await command.ExecuteNonQueryAsync();
+
+        return rowsAffected switch
+        {
+            0 => new UpdateOperationResult
+            {
+                Success = false,
+                Message = "Record not found.",
+                ErrorCode = UpdateErrorCode.RecordNotFound
+            },
+            1 => new UpdateOperationResult { Success = true, Message = null, ErrorCode = null },
+            _ => new UpdateOperationResult
+            {
+                Success = true,
+                Message = null,
+                ErrorCode = null,
+                MultipleRowsAffected = true
+            }
+        };
+    }
+    catch (DBConcurrencyException)
+    {
+        return new UpdateOperationResult
+        {
+            Success = false,
+            Message = "Concurrency violation.",
+            ErrorCode = UpdateErrorCode.ConcurrencyViolation
+        };
+    }
+    catch (Exception ex)
+    {
+        return new UpdateOperationResult
+        {
+            Success = false,
+            Message = $"Update failed: {ex.Message}",
+            ErrorCode = UpdateErrorCode.DatabaseError
+        };
+    }
+}
+
+
     public static async Task<DeleteOperationResult> DeleteAsync(ICanBeInsertedToDatabase objectToDelete)
     {
         var conn = objectToDelete.GetConnection();

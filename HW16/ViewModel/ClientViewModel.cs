@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using HW16.Core;
 using HW16.Core.Data;
@@ -20,7 +21,7 @@ public class ClientViewModel : BaseViewModel
         CurrentClient = client;
         SelectedSales = [];
         DeleteSelectedCommand = new RelayCommand(DeleteSelected, CanDeleteSelected);
-        RefreshSalesTable();
+        RefreshSalesTable().GetAwaiter().GetResult();
     }
     
     public ICommand DeleteSelectedCommand { get; }
@@ -44,7 +45,7 @@ public class ClientViewModel : BaseViewModel
                 MessageBox.Show("Удалено записей: " + SelectedSales.Count, "ОК",
                     MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
                 SelectedSales.Clear();
-                RefreshSalesTable();
+                RefreshSalesTable().GetAwaiter().GetResult();
                 break;
             case MessageBoxResult.None:
             case MessageBoxResult.Cancel:
@@ -59,9 +60,9 @@ public class ClientViewModel : BaseViewModel
         return SelectedSales.Count > 0;
     }
 
-    public void RefreshSalesTable()
+    public async Task RefreshSalesTable()
     {
-        var result = Database.Select<ProductSaleEntry>(entry => entry.Email == CurrentClient.Email);
+        var result = await Database.SelectAsync<ProductSaleEntry>(entry => entry.Email == CurrentClient.Email);
         if (result.ErrorCode == Database.SelectErrorCode.RecordNotFound)
         {
             MessageBox.Show("Нет зарегистрированных продаж. ", "Предупреждение",
@@ -71,11 +72,58 @@ public class ClientViewModel : BaseViewModel
         }
         if (!result.Success)
         {
-            MessageBox.Show("Ошибка загрузки базы данных. ", "Ошибка",
+            MessageBox.Show("Ошибка загрузки базы данных: " + result.Message, "Ошибка",
                 MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
             Sales = [];
         }
         Sales = new ObservableCollection<ProductSaleEntry>(result.Data);
         OnPropertyChanged(nameof(Sales));
+    }
+
+    public async Task<bool?> CellEdited(DataGridCellEditEndingEventArgs e)
+    {
+        if (e.EditingElement is not TextBox textBox) return null;
+        var newValue = textBox.Text;
+
+        if (e.Row.Item is not ProductSaleEntry editedEntry) return null;
+        if(e.Column.Header is not string columnName) return null;
+        var oldValue = GetOldValue(editedEntry, columnName);
+                
+        var propertyInfo = typeof(ProductSaleEntry).GetProperty(ColumnNameToPropertyName(columnName));
+        if (propertyInfo == null) return null;
+        if (Database.IsValidValue(newValue, propertyInfo))
+        {
+            propertyInfo.SetValue(editedEntry, Convert.ChangeType(newValue, propertyInfo.PropertyType));
+            await Database.UpdateAsync(editedEntry);
+            await RefreshSalesTable();
+            return true;
+        }
+
+        textBox.Text = oldValue;
+        return false;
+    }
+    
+    private static string ColumnNameToPropertyName(string columnName)
+    {
+        return (columnName switch
+        {
+            "ID записи" => nameof(ProductSaleEntry.Id),
+            "Email" => nameof(ProductSaleEntry.Email),
+            "ID Продукта" => nameof(ProductSaleEntry.ProductId),
+            "Наименование продукта" => nameof(ProductSaleEntry.ProductName),
+            _ => null
+        })!;
+    }
+    
+    private static string GetOldValue(ProductSaleEntry entry, string columnName)
+    {
+        return (columnName switch
+        {
+            "ID записи" => entry.Id.ToString(),
+            "Email" => entry.Email,
+            "ID Продукта" => entry.ProductId.ToString(),
+            "Наименование продукта" => entry.ProductName,
+            _ => null
+        })!;
     }
 }

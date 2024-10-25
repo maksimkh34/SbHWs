@@ -6,16 +6,13 @@
         mc:Ignorable="d"
         xmlns:vms="clr-namespace:HW16.ViewModel"
         Title="ClientDialog" Height="450" Width="800">
-    <Window.DataContext>
-        <vms:ClientViewModel></vms:ClientViewModel>
-    </Window.DataContext>
     <StackPanel>
         <Button Margin="15,5,0,5" Width="140" HorizontalAlignment="Left" Click="RefreshButton_OnClick">Обновить таблицу</Button>
         <DataGrid ItemsSource="{Binding Sales}" 
                   SelectionChanged="SalesDataGrid_OnSelectionChanged"
                   CanUserAddRows="False" CanUserDeleteRows="False" 
                   x:Name="SalesDataGrid"
-                  IsReadOnly="True"
+                  CellEditEnding="SalesDataGrid_OnCellEditEnding"
                   CanUserReorderColumns="False" AutoGenerateColumns="False">
             <DataGrid.ContextMenu>
                 <ContextMenu>
@@ -24,10 +21,10 @@
             </DataGrid.ContextMenu>
             
             <DataGrid.Columns>
-                <DataGridTextColumn x:Name="IdColumn" Header="ID записи" Binding="{Binding Id}" Width="50*" />
-                <DataGridTextColumn x:Name="PatronymicColumn" Header="Email" Binding="{Binding Email}" Width="150*" />
-                <DataGridTextColumn x:Name="SurnameColumn" Header="ID Продукта" Binding="{Binding ProductId}" Width="50*" />
-                <DataGridTextColumn x:Name="NameColumn" Header="Наименование продукта" Binding="{Binding ProductName}" Width="200*" />
+                <DataGridTextColumn x:Name="IdColumn" IsReadOnly="True" Header="ID записи" Binding="{Binding Id}" Width="50*" />
+                <DataGridTextColumn x:Name="EmailColumn" IsReadOnly="True" Header="Email" Binding="{Binding Email}" Width="150*" />
+                <DataGridTextColumn x:Name="ProductIdColumn" IsReadOnly="True" Header="ID Продукта" Binding="{Binding ProductId}" Width="50*" />
+                <DataGridTextColumn x:Name="ProductNameColumn" Header="Наименование продукта" Binding="{Binding ProductName}" Width="200*" />
             </DataGrid.Columns>
         </DataGrid>
     </StackPanel>

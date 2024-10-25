@@ -56,7 +56,8 @@ public static partial class Database
             return !string.IsNullOrEmpty(str) && EmailRegex().IsMatch(str);
         }
         // ReSharper disable once InvertIf
-        if (propertyInfo.Name.Contains("Surname") || propertyInfo.Name.Contains("Name"))
+        if ((propertyInfo.Name.Contains("Surname") || propertyInfo.Name.Contains("Name")) 
+            && !propertyInfo.Name.Contains("Product"))
         {
             var regex = NameRegex();
             return regex.IsMatch(str);
