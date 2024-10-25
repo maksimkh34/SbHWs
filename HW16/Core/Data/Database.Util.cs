@@ -46,10 +46,11 @@ public static partial class Database
         public bool MultipleRowsAffected { get; set; }
     }
 
-    public static bool IsValidValue(object? value, PropertyInfo propertyInfo)
+    public static bool IsValidValue(object? value, PropertyInfo propertyInfo, bool acceptNull = true)
     {
         if (!ValidateValues) return true;
         var str = value?.ToString()!.TrimEnd()!;
+        if((value == null || string.IsNullOrWhiteSpace(str)) && !acceptNull) return false;
         if(propertyInfo.Name.Contains("Email")) return value != null && str.Contains('@') && str.Contains('.');
         if (propertyInfo.Name.Contains("PhoneNumber"))
         {

@@ -20,9 +20,9 @@ public partial class ClientDialog
         InitializeComponent();
     }
 
-    private void RefreshButton_OnClick(object sender, RoutedEventArgs e)
+    private async void RefreshButton_OnClick(object sender, RoutedEventArgs e)
     {
-        ViewModel.RefreshSalesTable();
+        await ViewModel.RefreshSalesTable();
     }
 
     private void SalesDataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -44,5 +44,10 @@ public partial class ClientDialog
                     MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
                 break;
         }
+    }
+
+    private async void RegisterEntry_OnClick(object sender, RoutedEventArgs e)
+    {
+        await ViewModel.OpenRegDialog();
     }
 }

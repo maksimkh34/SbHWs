@@ -7,7 +7,15 @@
         xmlns:vms="clr-namespace:HW16.ViewModel"
         Title="ClientDialog" Height="450" Width="800">
     <StackPanel>
-        <Button Margin="15,5,0,5" Width="140" HorizontalAlignment="Left" Click="RefreshButton_OnClick">Обновить таблицу</Button>
+        <StackPanel Orientation="Horizontal">
+            <Button Margin="15,5,0,5" 
+                    Width="140" HorizontalAlignment="Left" 
+                    Click="RefreshButton_OnClick">Обновить таблицу</Button>
+            <Button Margin="5,5,0,5" 
+                    Width="140" 
+                    HorizontalAlignment="Left" 
+                    Click="RegisterEntry_OnClick">Добавить запись</Button>
+        </StackPanel>
         <DataGrid ItemsSource="{Binding Sales}" 
                   SelectionChanged="SalesDataGrid_OnSelectionChanged"
                   CanUserAddRows="False" CanUserDeleteRows="False" 

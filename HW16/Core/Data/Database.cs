@@ -82,28 +82,28 @@ public static async Task<UpdateOperationResult> UpdateAsync(ICanBeInsertedToData
         await conn.OpenAsync();
     }
 
-    var commandType = objectToUpdate.GetCommandType();
-    var command = (DbCommand)Activator.CreateInstance(commandType)!;
+    var command = (DbCommand)Activator.CreateInstance(objectToUpdate.GetCommandType())!;
     var isOleDb = command is OleDbCommand;
 
     var columns = objectToUpdate.GetType().GetProperties()
-        .Where(p => p.Name != "Id" && p.Name != "Table")
+        .Where(p => !string.Equals(p.Name, "Id", StringComparison.OrdinalIgnoreCase) && p.Name != "Table")
         .Select((propertyInfo, index) => $"{propertyInfo.Name} = {(isOleDb ? "?" : $"@param{index}")}")
-        .Aggregate("", (current, param) => current + param + ", ")
-        .TrimEnd(',', ' ');
+        .Aggregate((current, next) => $"{current}, {next}");
 
     var sql = $"UPDATE {objectToUpdate.Table} SET {columns} WHERE Id = {(isOleDb ? "?" : "@Id")};";
     command.CommandText = sql;
     command.Connection = conn;
 
     var parameterIndex = 0;
+    var idValue = objectToUpdate.GetType().GetProperty("Id")?.GetValue(objectToUpdate) ?? DBNull.Value;
+
     foreach (var propertyInfo in objectToUpdate.GetType().GetProperties())
     {
-        if (propertyInfo.Name == "Table" || propertyInfo.Name.Equals("id", StringComparison.CurrentCultureIgnoreCase)) 
+        if (propertyInfo.Name == "Table" || string.Equals(propertyInfo.Name, "Id", StringComparison.OrdinalIgnoreCase))
             continue;
-        var value = propertyInfo.GetValue(objectToUpdate);
 
-        if (propertyInfo.Name != "Id" && !IsValidValue(value, propertyInfo))
+        var value = propertyInfo.GetValue(objectToUpdate);
+        if (!IsValidValue(value, propertyInfo))
         {
             return new UpdateOperationResult
             {
@@ -119,27 +119,14 @@ public static async Task<UpdateOperationResult> UpdateAsync(ICanBeInsertedToData
         command.Parameters.Add(parameter);
     }
     
-    if (!isOleDb)
-    {
-        var idValue = objectToUpdate.GetType().GetProperty("Id")?.GetValue(objectToUpdate) ?? DBNull.Value;
-        var idParameter = command.CreateParameter();
-        idParameter.ParameterName = "@Id";
-        idParameter.Value = idValue;
-        command.Parameters.Add(idParameter);
-    }
-    else
-    {
-        var idValue = objectToUpdate.GetType().GetProperty("Id")?.GetValue(objectToUpdate) ?? DBNull.Value;
-        var idParameter = command.CreateParameter();
-        idParameter.Value = idValue;
-        command.Parameters.Add(idParameter);
-    }
-    
+    var idParameter = command.CreateParameter();
+    idParameter.ParameterName = isOleDb ? "?" : "@Id";
+    idParameter.Value = idValue;
+    command.Parameters.Add(idParameter);
 
     try
     {
         var rowsAffected = await command.ExecuteNonQueryAsync();
-
         return rowsAffected switch
         {
             0 => new UpdateOperationResult
@@ -177,6 +164,7 @@ public static async Task<UpdateOperationResult> UpdateAsync(ICanBeInsertedToData
         };
     }
 }
+
 
 
     public static async Task<DeleteOperationResult> DeleteAsync(ICanBeInsertedToDatabase objectToDelete)

@@ -126,4 +126,10 @@ public class ClientViewModel : BaseViewModel
             _ => null
         })!;
     }
+
+    public async Task OpenRegDialog()
+    {
+        new AddSaleDialog().ShowDialog();
+        await RefreshSalesTable();
+    }
 }
