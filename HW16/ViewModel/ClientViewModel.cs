@@ -68,6 +68,7 @@ public class ClientViewModel : BaseViewModel
             MessageBox.Show("Нет зарегистрированных продаж. ", "Предупреждение",
                 MessageBoxButton.OK, MessageBoxImage.Warning, MessageBoxResult.OK);
             Sales = [];
+            OnPropertyChanged(nameof(Sales));
             return;
         }
         if (!result.Success)

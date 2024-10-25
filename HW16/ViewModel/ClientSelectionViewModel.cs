@@ -124,7 +124,7 @@ public class ClientSelectionViewModel : BaseViewModel
         return SelectedClients.Count != 0;
     }
     
-    public ListCollectionView  ClientsView { get; } = null!;
+    public ListCollectionView ClientsView { get; } = null!;
     private string _idFilter = "";
     public string IdFilter
     {
@@ -227,7 +227,8 @@ public class ClientSelectionViewModel : BaseViewModel
         {
             Clients.Add(client);
         }
-        ClientsView.Refresh();
+        // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
+        ClientsView?.Refresh();
     }
 
 

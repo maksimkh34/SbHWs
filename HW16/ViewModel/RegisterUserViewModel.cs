@@ -31,7 +31,8 @@ public class RegisterUserViewModel : BaseViewModel
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Surname))
+        if (!Database.IsValidValue(Name, typeof(Client).GetProperty(nameof(Client.Name))!) || 
+            !Database.IsValidValue(Surname, typeof(Client).GetProperty(nameof(Client.Surname))!))
         {
             MessageBox.Show("Invalid Name / Surname.",
                 "Error",
@@ -57,7 +58,7 @@ public class RegisterUserViewModel : BaseViewModel
                 MessageBoxImage.Error);
         }
         
-        MessageBox.Show("Client registered! ",
+        MessageBox.Show("Клиент зарегистрирован! ",
             "OK",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
