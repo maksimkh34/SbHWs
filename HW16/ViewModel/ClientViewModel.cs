@@ -129,7 +129,7 @@ public class ClientViewModel : BaseViewModel
 
     public async Task OpenRegDialog()
     {
-        new AddSaleDialog().ShowDialog();
+        new AddSaleDialog(CurrentClient.Email).ShowDialog();
         await RefreshSalesTable();
     }
 }

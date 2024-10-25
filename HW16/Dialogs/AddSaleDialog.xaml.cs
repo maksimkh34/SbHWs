@@ -11,9 +11,10 @@ public partial class AddSaleDialog : Window
         set => DataContext = value;
     }
     
-    public AddSaleDialog()
+    public AddSaleDialog(string email)
     {
         InitializeComponent();
+        ViewModel = new AddSaleViewModel(email);
     }
 
     private async void ButtonBase_OnClick(object sender, RoutedEventArgs e)

@@ -5,11 +5,11 @@ using HW16.Core.Data;
 
 namespace HW16.ViewModel;
 
-public class AddSaleViewModel : BaseViewModel
+public class AddSaleViewModel(string email) : BaseViewModel
 {
     public string ProductName { get; set; }
     public string ProductId { get; set; }
-    public string Email { get; set; }
+    public string Email { get; set; } = email;
 
     public async Task<bool> TryRegister()
     {
